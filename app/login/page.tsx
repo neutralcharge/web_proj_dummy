@@ -1,4 +1,5 @@
 "use client"
+
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { gsap } from "gsap"
@@ -7,14 +8,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { useAuth } from "../contexts/AuthContext"
-import type React from "react"
+import type React from "react" // Added import for React
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true)
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [role, setRole] = useState("user")
-  const [isLoading, setIsLoading] = useState(false)
   const { login, signup } = useAuth()
   const router = useRouter()
 
@@ -30,32 +30,12 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
-    try {
-      if (isLogin) {
-        await login(username, password)
-        // For login, route based on role from auth context or user data
-        // You might need to get the user's role from your auth context
-        if (role === "doctor") {
-          router.push("/dashboard/doctor")  // Doctor dashboard
-        } else {
-          router.push("/dashboard/patient") // Patient dashboard
-        }
-      } else {
-        await signup(username, password, role)
-        // For signup, route based on selected role
-        if (role === "doctor") {
-          router.push("/dashboard/doctor")  // Doctor dashboard
-        } else {
-          router.push("/dashboard/patient") // Patient dashboard
-        }
-      }
-    } catch (error) {
-      console.error("Authentication error:", error)
-      // Handle error here (maybe show an error message)
-    } finally {
-      setIsLoading(false)
+    if (isLogin) {
+      await login(username, password)
+    } else {
+      await signup(username, password, role)
     }
+    router.push("/")
   }
 
   return (
@@ -73,7 +53,6 @@ export default function LoginPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter your username"
-              required
             />
           </div>
           <div className="login-content">
@@ -84,7 +63,6 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
-              required
             />
           </div>
           {!isLogin && (
@@ -102,28 +80,13 @@ export default function LoginPage() {
               </RadioGroup>
             </div>
           )}
-          <Button 
-            className="login-content w-full" 
-            type="submit"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <div className="flex items-center justify-center gap-2">
-                <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Processing...
-              </div>
-            ) : (
-              isLogin ? "Login" : "Sign Up"
-            )}
+          <Button className="login-content w-full" type="submit">
+            {isLogin ? "Login" : "Sign Up"}
           </Button>
         </form>
         <p className="login-content text-center mt-4">
           {isLogin ? "Don't have an account? " : "Already have an account? "}
-          <button 
-            type="button"
-            className="text-sky-600 hover:underline" 
-            onClick={() => setIsLogin(!isLogin)}
-          >
+          <button className="text-sky-600 hover:underline" onClick={() => setIsLogin(!isLogin)}>
             {isLogin ? "Sign Up" : "Login"}
           </button>
         </p>
