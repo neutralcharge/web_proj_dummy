@@ -13,78 +13,106 @@ interface Particle {
 
 export function AnimatedBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const particles: Particle[] = [];
+  const particlesRef = useRef<Particle[]>([]);
+  const animationFrameId = useRef<number>();
+  const particleCount = useRef(50); // Using ref for particle count
+
+  // Configuration object for easy customization
+  const config = {
+    baseColor: [59, 130, 246] as const, // RGB values for blue-500
+    maxParticleSize: 5,
+    speedRange: 1,
+    opacityRange: { min: 0.1, max: 0.6 },
+    fadeEffect: 0.05,
+    symbolScale: 4,
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
-    const particleCount = 50;
 
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-
-      // Ensure particles don't go out of bounds
-      particles.forEach((particle) => {
-        particle.x = Math.random() * canvas.width;
-        particle.y = Math.random() * canvas.height;
-      });
+      
+      // Reinitialize particles on resize
+      particlesRef.current = Array.from({ length: particleCount.current }, () =>
+        createParticle(canvas.width, canvas.height)
+      );
     };
 
-    const createParticle = (): Particle => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      size: Math.random() * 5 + 1,
-      speedX: Math.random() * 2 - 1,
-      speedY: Math.random() * 2 - 1,
-      opacity: Math.random() * 0.5 + 0.1,
+    const createParticle = (width: number, height: number): Particle => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      size: Math.random() * config.maxParticleSize + 1,
+      speedX: Math.random() * config.speedRange * 2 - config.speedRange,
+      speedY: Math.random() * config.speedRange * 2 - config.speedRange,
+      opacity: Math.random() * (config.opacityRange.max - config.opacityRange.min) + config.opacityRange.min,
     });
 
-    const drawMedicalSymbol = (x: number, y: number, size: number, opacity: number) => {
+    const drawMedicalSymbol = (
+      ctx: CanvasRenderingContext2D,
+      x: number,
+      y: number,
+      size: number,
+      opacity: number
+    ) => {
       ctx.beginPath();
-      ctx.strokeStyle = `rgba(59, 130, 246, ${opacity})`;
+      ctx.strokeStyle = `rgba(${config.baseColor.join(",")}, ${opacity})`;
       ctx.lineWidth = 2;
-
-      // Draw cross
+      
+      // Draw horizontal line
       ctx.moveTo(x - size / 2, y);
       ctx.lineTo(x + size / 2, y);
+      
+      // Draw vertical line
       ctx.moveTo(x, y - size / 2);
       ctx.lineTo(x, y + size / 2);
-
+      
       ctx.stroke();
     };
 
     const animate = () => {
-      ctx.fillStyle = "rgba(255, 255, 255, 0.05)"; // Soft fade effect
+      if (!ctx || !canvas) return;
+
+      // Soft fade effect
+      ctx.fillStyle = `rgba(255, 255, 255, ${config.fadeEffect})`;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      particles.forEach((particle) => {
+      particlesRef.current.forEach((particle) => {
+        // Update position with boundary checks
         particle.x += particle.speedX;
         particle.y += particle.speedY;
 
-        if (particle.x < 0 || particle.x > canvas.width) particle.speedX *= -1;
-        if (particle.y < 0 || particle.y > canvas.height) particle.speedY *= -1;
+        // Bounce off walls
+        if (particle.x <= 0 || particle.x >= canvas.width) particle.speedX *= -1;
+        if (particle.y <= 0 || particle.y >= canvas.height) particle.speedY *= -1;
 
-        drawMedicalSymbol(particle.x, particle.y, particle.size * 4, particle.opacity);
+        // Draw symbol
+        drawMedicalSymbol(
+          ctx,
+          particle.x,
+          particle.y,
+          particle.size * config.symbolScale,
+          particle.opacity
+        );
       });
 
-      requestAnimationFrame(animate);
+      animationFrameId.current = requestAnimationFrame(animate);
     };
 
+    // Initial setup
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
-
-    for (let i = 0; i < particleCount; i++) {
-      particles.push(createParticle());
-    }
-
     animate();
 
+    // Cleanup
     return () => {
+      if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current);
+      }
       window.removeEventListener("resize", resizeCanvas);
     };
   }, []);
@@ -92,8 +120,9 @@ export function AnimatedBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full opacity-20"
+      className="absolute inset-0 w-full h-full opacity-20 pointer-events-none"
       style={{ mixBlendMode: "multiply" }}
+      aria-hidden="true"
     />
   );
 }
