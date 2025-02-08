@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { gsap } from "gsap";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "./contexts/AuthContext";
 import { Heart, Activity, Stethoscope, Pill, Ambulance } from "lucide-react";
@@ -107,24 +106,38 @@ function AnimatedBackground() {
 
 // Floating Icons Component
 function FloatingIcon({ icon, delay, x, y }: { icon: React.ReactNode; delay: number; x: number; y: number }) {
-  return (
-    <motion.div
-      className="absolute text-blue-500/20"
-      initial={{ opacity: 0 }}
-      animate={{
-        opacity: [0.2, 0.5, 0.2],
-        y: [y, y - 50, y],
-        x: [x, x + 30, x],
-      }}
-      transition={{
+  const iconRef = useRef(null);
+
+  useEffect(() => {
+    const tl = gsap.timeline({
+      repeat: -1,
+      yoyo: true,
+    });
+
+    tl.fromTo(
+      iconRef.current,
+      {
+        opacity: 0.2,
+        y: y,
+        x: x,
+      },
+      {
+        opacity: 0.5,
+        y: y - 50,
+        x: x + 30,
         duration: 5,
         delay,
-        repeat: Infinity,
-        repeatType: "reverse",
-      }}
-    >
+        ease: "power1.inOut",
+      }
+    );
+
+    return () => tl.kill();
+  }, [delay, x, y]);
+
+  return (
+    <div ref={iconRef} className="absolute text-blue-500/20">
       {icon}
-    </motion.div>
+    </div>
   );
 }
 
@@ -142,24 +155,25 @@ function FloatingElements() {
 
 // Stats Card Component
 function StatsCard({ number, text, delay }: { number: string; text: string; delay: number }) {
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    gsap.from(cardRef.current, {
+      opacity: 0,
+      y: 20,
+      duration: 0.8,
+      delay,
+    });
+  }, [delay]);
+
   return (
-    <motion.div
-      className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-lg"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay }}
-      whileHover={{ y: -5 }}
+    <div
+      ref={cardRef}
+      className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-transform duration-300"
     >
-      <motion.h3
-        className="text-3xl font-bold text-blue-600 mb-2"
-        initial={{ scale: 0.5 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: delay + 0.2 }}
-      >
-        {number}
-      </motion.h3>
+      <h3 className="text-3xl font-bold text-blue-600 mb-2">{number}</h3>
       <p className="text-gray-600">{text}</p>
-    </motion.div>
+    </div>
   );
 }
 
@@ -168,13 +182,25 @@ export default function HomePage() {
   const { user } = useAuth();
 
   useEffect(() => {
-    gsap.from(".hero-content", {
+    const tl = gsap.timeline();
+
+    tl.from(".hero-title", {
+      scale: 0.5,
       opacity: 0,
-      y: 50,
-      duration: 1,
-      ease: "power3.out",
-      stagger: 0.2,
-    });
+      duration: 0.8,
+    })
+      .from(".hero-subtitle", {
+        opacity: 0,
+        y: 20,
+        duration: 0.8,
+      }, "-=0.4")
+      .from(".hero-buttons", {
+        opacity: 0,
+        y: 20,
+        duration: 0.8,
+      }, "-=0.4");
+
+    return () => tl.kill();
   }, []);
 
   return (
@@ -184,48 +210,22 @@ export default function HomePage() {
       <AnimatedBackground />
       <FloatingElements />
 
-      {/* DNA Helix Animation */}
-      <motion.div
-        className="absolute inset-0 opacity-10"
-        style={{
-          background: "linear-gradient(45deg, transparent 45%, #3B82F6 45%, #3B82F6 55%, transparent 55%)",
-          backgroundSize: "20px 20px",
-        }}
-        animate={{ backgroundPosition: ["0px 0px", "20px 20px"] }}
-        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-      />
-
       {/* Main Content */}
       <div className="relative z-10 container mx-auto px-4 pt-32 pb-20">
         <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            className="mb-8"
-          >
-            <h1 className="hero-content text-5xl md:text-7xl font-bold text-gray-800 mb-6 leading-tight">
+          <div className="mb-8">
+            <h1 className="hero-title text-5xl md:text-7xl font-bold text-gray-800 mb-6 leading-tight">
               Welcome to <span className="text-blue-600">HealthBuddy</span>
             </h1>
-          </motion.div>
+          </div>
 
-          <motion.p
-            className="hero-content text-xl md:text-2xl text-gray-600 mb-12"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
+          <p className="hero-subtitle text-xl md:text-2xl text-gray-600 mb-12">
             Your trusted healthcare companion for a healthier tomorrow
-          </motion.p>
+          </p>
 
           {/* Dynamic Buttons Based on User */}
-          <motion.div
-            className="relative"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-          >
-            <div className="flex flex-col md:flex-row gap-6 justify-center hero-content">
+          <div className="hero-buttons">
+            <div className="flex flex-col md:flex-row gap-6 justify-center">
               {user ? (
                 user.role === "doctor" ? (
                   <>
@@ -255,44 +255,16 @@ export default function HomePage() {
                 </Button>
               )}
             </div>
-          </motion.div>
+          </div>
 
           {/* Stats Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20"
-          >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20">
             <StatsCard number="10k+" text="Happy Patients" delay={0.3} />
             <StatsCard number="50+" text="Expert Doctors" delay={0.6} />
             <StatsCard number="24/7" text="Medical Care" delay={0.9} />
-          </motion.div>
+          </div>
         </div>
       </div>
-
-      {/* Bottom Wave Animation */}
-      <motion.div
-        className="absolute bottom-0 left-0 right-0"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
-      >
-        <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <motion.path
-            d="M0 0L48 8.875C96 17.75 192 35.5 288 44.375C384 53.25 480 53.25 576 44.375C672 35.5 768 17.75 864 17.75C960 17.75 1056 35.5 1152 44.375C1248 53.25 1344 53.25 1392 53.25H1440V120H1392C1344 120 1248 120 1152 120C1056 120 960 120 864 120C768 120 672 120 576 120C480 120 384 120 288 120C192 120 96 120 48 120H0V0Z"
-            fill="#3B82F6"
-            fillOpacity="0.1"
-            animate={{
-              d: [
-                "M0 0L48 8.875C96 17.75 192 35.5 288 44.375C384 53.25 480 53.25 576 44.375C672 35.5 768 17.75 864 17.75C960 17.75 1056 35.5 1152 44.375C1248 53.25 1344 53.25 1392 53.25H1440V120H1392C1344 120 1248 120 1152 120C1056 120 960 120 864 120C768 120 672 120 576 120C480 120 384 120 288 120C192 120 96 120 48 120H0V0Z",
-                "M0 20L48 28.875C96 37.75 192 55.5 288 64.375C384 73.25 480 73.25 576 64.375C672 55.5 768 37.75 864 37.75C960 37.75 1056 55.5 1152 64.375C1248 73.25 1344 73.25 1392 73.25H1440V140H1392C1344 140 1248 140 1152 140C1056 140 960 140 864 140C768 140 672 140 576 140C480 140 384 140 288 140C192 140 96 140 48 140H0V20Z",
-              ],
-            }}
-            transition={{ duration: 5, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
-          />
-        </svg>
-      </motion.div>
     </section>
   );
 }
