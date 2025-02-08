@@ -6,7 +6,7 @@ import { gsap } from "gsap";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "./contexts/AuthContext";
-import { Heart, Activity, Stethoscope, Pill, AmbulanceIcon as FirstAid } from "lucide-react";
+import { Heart, Activity, Stethoscope, Pill, Ambulance } from "lucide-react";
 
 // Particle Animation Component
 interface Particle {
@@ -88,7 +88,9 @@ function AnimatedBackground() {
     animate();
 
     return () => {
-      cancelAnimationFrame(animationFrameId.current!);
+      if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current);
+      }
       window.removeEventListener("resize", resizeCanvas);
     };
   }, []);
@@ -133,7 +135,7 @@ function FloatingElements() {
       <FloatingIcon icon={<Activity size={48} />} delay={1} x={200} y={300} />
       <FloatingIcon icon={<Stethoscope size={56} />} delay={2} x={800} y={200} />
       <FloatingIcon icon={<Pill size={40} />} delay={1.5} x={700} y={400} />
-      <FloatingIcon icon={<FirstAid size={48} />} delay={2.5} x={300} y={500} />
+      <FloatingIcon icon={<Ambulance size={48} />} delay={2.5} x={300} y={500} />
     </div>
   );
 }
