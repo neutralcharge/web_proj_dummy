@@ -6,23 +6,13 @@ interface ServiceCardProps {
   title: string;
   description: string;
   icon: React.ReactNode;
-  hideImage?: boolean;
 }
 
-const ServiceCardPreview: React.FC<ServiceCardProps> = ({ title, description, icon, hideImage }) => {
+const ServiceCardPreview: React.FC<ServiceCardProps> = ({ title, description, icon }) => {
   return (
     <div className="group transition-all duration-300 hover:z-10">
       <div className="transform transition-all duration-300 group-hover:-translate-y-4 group-hover:shadow-2xl">
         <Card className="overflow-hidden bg-white rounded-2xl h-full transition-all duration-300 hover:shadow-xl">
-          {!hideImage && (
-            <div className="aspect-w-16 aspect-h-9 overflow-hidden bg-gray-100">
-              <img 
-                src="/api/placeholder/800/450" 
-                alt={title}
-                className="object-cover w-full h-full transition-all duration-500 group-hover:scale-110"
-              />
-            </div>
-          )}
           <CardHeader>
             <div className="mb-4 text-blue-600 transition-transform duration-300 group-hover:scale-110 group-hover:transform">
               {icon}
@@ -47,20 +37,17 @@ export default function Preview() {
     {
       title: "Online Consultations",
       description: "Connect with healthcare professionals from the comfort of your home.",
-      icon: <Video className="w-6 h-6" />,
-      hideImage: true
+      icon: <Video className="w-6 h-6" />
     },
     {
       title: "Appointment Booking",
       description: "Easily schedule appointments with your preferred doctors.",
-      icon: <Calendar className="w-6 h-6" />,
-      hideImage: true
+      icon: <Calendar className="w-6 h-6" />
     },
     {
       title: "AI-Powered Health Assistant",
       description: "Get instant answers to your health queries using our advanced AI.",
-      icon: <Brain className="w-6 h-6" />,
-      hideImage: true
+      icon: <Brain className="w-6 h-6" />
     },
     {
       title: "Electronic Health Records",
@@ -92,7 +79,6 @@ export default function Preview() {
               title={service.title}
               description={service.description}
               icon={service.icon}
-              hideImage={service.hideImage}
             />
           ))}
         </div>
