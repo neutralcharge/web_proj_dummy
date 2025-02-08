@@ -12,7 +12,7 @@ import { HeartPulse, Stethoscope, UserCircle, Mail, Lock } from "lucide-react"
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true)
-  const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [role, setRole] = useState("user")
   const [isLoading, setIsLoading] = useState(false)
@@ -23,19 +23,75 @@ export default function LoginPage() {
   const ecgLineRef = useRef<SVGPathElement>(null)
   const formRef = useRef<HTMLDivElement>(null)
 
-  // All previous animation effects remain the same...
-  // [Previous animation code remains unchanged]
+  // Initialize animations
+  useEffect(() => {
+    gsap.from(".login-content", {
+      opacity: 0,
+      y: 20,
+      duration: 0.8,
+      ease: "power3.out",
+      stagger: 0.2,
+    })
+
+    // Initial card animation
+    gsap.from(".auth-card", {
+      duration: 1,
+      scale: 0.8,
+      opacity: 0,
+      ease: "power3.out",
+    })
+
+    // Decorative elements animation
+    gsap.from(".decorative-element", {
+      duration: 1.5,
+      scale: 0,
+      rotation: 180,
+      stagger: 0.2,
+      ease: "elastic.out(1, 0.5)",
+    })
+
+    // ECG line animation
+    if (ecgLineRef.current) {
+      const pathLength = ecgLineRef.current.getTotalLength()
+      ecgLineRef.current.style.strokeDasharray = `${pathLength} ${pathLength}`
+      ecgLineRef.current.style.strokeDashoffset = `${pathLength}`
+
+      gsap.to(ecgLineRef.current, {
+        strokeDashoffset: 0,
+        duration: 2,
+        repeat: -1,
+        ease: "none",
+      })
+    }
+
+    // Plus symbols animation
+    document.querySelectorAll('.plus-symbol').forEach((plus) => {
+      gsap.to(plus, {
+        rotation: 180,
+        scale: gsap.utils.random(0.5, 1),
+        opacity: gsap.utils.random(0.2, 0.5),
+        duration: gsap.utils.random(3, 5),
+        repeat: -1,
+        yoyo: true,
+        ease: "none",
+      })
+    })
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     try {
       if (isLogin) {
-        await login(email, password, role)
+        await login(username, password)
+        // Use the role from the successful login response to determine redirect
+        router.push("/")  // This will redirect based on the user's role
       } else {
-        await signup(email, password, role)
+        await signup(username, password, role)
+        router.push("/")  // After signup, redirect to home which will then route based on role
       }
-      router.push(role === "doctor" ? "/doctor-dashboard" : "/user-dashboard")
+    } catch (error) {
+      console.error("Authentication error:", error)
     } finally {
       setIsLoading(false)
     }
@@ -43,14 +99,16 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-sky-100 relative overflow-hidden">
-      {/* Background Pattern and ECG Line animations remain the same */}
-      <div className="absolute inset-0 opacity-10 bg-pattern"
+      {/* Background Pattern */}
+      <div 
+        className="absolute inset-0 opacity-10 bg-pattern"
         style={{
           backgroundImage: `radial-gradient(circle at 10% 10%, #3B82F622 20%, transparent 20%)`,
           backgroundSize: "40px 40px",
         }}
       />
 
+      {/* ECG Line Animation */}
       <svg className="absolute inset-0 w-full h-full pointer-events-none">
         <path
           ref={ecgLineRef}
@@ -117,17 +175,17 @@ export default function LoginPage() {
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="login-content">
-              <Label htmlFor="email" className="flex items-center gap-2 text-gray-700">
-                <Mail className="h-4 w-4" />
-                Email Address
+              <Label htmlFor="username" className="flex items-center gap-2 text-gray-700">
+                <UserCircle className="h-4 w-4" />
+                Username
               </Label>
               <Input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="mt-1 focus-visible:ring-blue-500"
-                placeholder={`Enter your ${role === 'doctor' ? 'professional' : 'personal'} email`}
+                placeholder="Enter your username"
               />
             </div>
 
@@ -178,12 +236,6 @@ export default function LoginPage() {
                 </span>
               )}
             </Button>
-
-            {role === 'doctor' && !isLogin && (
-              <p className="text-sm text-gray-500 text-center">
-                Note: Doctor accounts require verification of medical credentials
-              </p>
-            )}
           </form>
 
           <div className="mt-6 space-y-4">
