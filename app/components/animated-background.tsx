@@ -1,33 +1,39 @@
-"use client"
+"use client";
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef } from "react";
 
 interface Particle {
-  x: number
-  y: number
-  size: number
-  speedX: number
-  speedY: number
-  opacity: number
+  x: number;
+  y: number;
+  size: number;
+  speedX: number;
+  speedY: number;
+  opacity: number;
 }
 
 export function AnimatedBackground() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const particles: Particle[] = [];
 
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-    const particles: Particle[] = []
-    const particleCount = 50
+    const particleCount = 50;
 
     const resizeCanvas = () => {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
-    }
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      // Ensure particles don't go out of bounds
+      particles.forEach((particle) => {
+        particle.x = Math.random() * canvas.width;
+        particle.y = Math.random() * canvas.height;
+      });
+    };
 
     const createParticle = (): Particle => ({
       x: Math.random() * canvas.width,
@@ -36,51 +42,52 @@ export function AnimatedBackground() {
       speedX: Math.random() * 2 - 1,
       speedY: Math.random() * 2 - 1,
       opacity: Math.random() * 0.5 + 0.1,
-    })
+    });
 
     const drawMedicalSymbol = (x: number, y: number, size: number, opacity: number) => {
-      ctx.beginPath()
-      ctx.strokeStyle = `rgba(59, 130, 246, ${opacity})`
-      ctx.lineWidth = 2
+      ctx.beginPath();
+      ctx.strokeStyle = `rgba(59, 130, 246, ${opacity})`;
+      ctx.lineWidth = 2;
 
       // Draw cross
-      ctx.moveTo(x - size / 2, y)
-      ctx.lineTo(x + size / 2, y)
-      ctx.moveTo(x, y - size / 2)
-      ctx.lineTo(x, y + size / 2)
+      ctx.moveTo(x - size / 2, y);
+      ctx.lineTo(x + size / 2, y);
+      ctx.moveTo(x, y - size / 2);
+      ctx.lineTo(x, y + size / 2);
 
-      ctx.stroke()
-    }
+      ctx.stroke();
+    };
 
     const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.fillStyle = "rgba(255, 255, 255, 0.05)"; // Soft fade effect
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       particles.forEach((particle) => {
-        particle.x += particle.speedX
-        particle.y += particle.speedY
+        particle.x += particle.speedX;
+        particle.y += particle.speedY;
 
-        if (particle.x < 0 || particle.x > canvas.width) particle.speedX *= -1
-        if (particle.y < 0 || particle.y > canvas.height) particle.speedY *= -1
+        if (particle.x < 0 || particle.x > canvas.width) particle.speedX *= -1;
+        if (particle.y < 0 || particle.y > canvas.height) particle.speedY *= -1;
 
-        drawMedicalSymbol(particle.x, particle.y, particle.size * 4, particle.opacity)
-      })
+        drawMedicalSymbol(particle.x, particle.y, particle.size * 4, particle.opacity);
+      });
 
-      requestAnimationFrame(animate)
-    }
+      requestAnimationFrame(animate);
+    };
 
-    resizeCanvas()
-    window.addEventListener("resize", resizeCanvas)
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
 
     for (let i = 0; i < particleCount; i++) {
-      particles.push(createParticle())
+      particles.push(createParticle());
     }
 
-    animate()
+    animate();
 
     return () => {
-      window.removeEventListener("resize", resizeCanvas)
-    }
-  }, [])
+      window.removeEventListener("resize", resizeCanvas);
+    };
+  }, []);
 
   return (
     <canvas
@@ -88,6 +95,5 @@ export function AnimatedBackground() {
       className="absolute inset-0 w-full h-full opacity-20"
       style={{ mixBlendMode: "multiply" }}
     />
-  )
+  );
 }
-
