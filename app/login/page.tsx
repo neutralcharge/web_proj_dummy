@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Heart } from "lucide-react"
+import { Heart, Stethoscope } from "lucide-react"
 
 export default function AuthPage() {
   const [username, setUsername] = useState("")
@@ -39,6 +39,7 @@ export default function AuthPage() {
             <div className="relative hidden md:block bg-gradient-to-br from-cyan-600 to-blue-700 rounded-l-xl">
               <div className="flex flex-col items-center justify-center h-full text-white p-6 space-y-6">
                 <Heart className="w-16 h-16 auth-element" />
+                <Stethoscope className="w-14 h-14 auth-element" />
                 <h2 className="text-2xl font-bold text-center auth-element">HealthConnect Pro</h2>
                 <p className="text-center text-blue-100 auth-element">
                   Secure medical portal for healthcare professionals and patients
