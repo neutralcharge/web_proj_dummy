@@ -86,6 +86,15 @@ export default function LoginPage() {
       repeat: -1,
       ease: "none",
     })
+
+    // Login content animation from second file
+    gsap.from(".login-content", {
+      opacity: 0,
+      y: 20,
+      duration: 0.8,
+      ease: "power3.out",
+      stagger: 0.2,
+    })
   }, [])
 
   // Form transition effect
@@ -157,7 +166,7 @@ export default function LoginPage() {
         ref={containerRef}
         className="auth-card bg-white p-8 rounded-xl shadow-2xl w-96 relative z-10 border border-blue-50"
       >
-        <div ref={formRef}>
+        <div ref={formRef} className="login-content">
           <div className="text-center mb-8">
             <div className="inline-block">
               <HeartPulse className="h-16 w-16 text-blue-600 mx-auto mb-4 decorative-element" />
@@ -171,7 +180,7 @@ export default function LoginPage() {
           </div>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
-            <div>
+            <div className="login-content">
               <Label htmlFor="username" className="flex items-center gap-2 text-gray-700">
                 <UserCircle className="h-4 w-4" />
                 Username
@@ -182,10 +191,11 @@ export default function LoginPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="mt-1 focus-visible:ring-blue-500"
+                placeholder="Enter your username"
               />
             </div>
 
-            <div>
+            <div className="login-content">
               <Label htmlFor="password" className="flex items-center gap-2 text-gray-700">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -205,11 +215,12 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 focus-visible:ring-blue-500"
+                placeholder="Enter your password"
               />
             </div>
 
             {!isLogin && (
-              <div ref={roleFieldRef} className="overflow-hidden">
+              <div ref={roleFieldRef} className="login-content overflow-hidden">
                 <Label className="block mb-2 text-gray-700">Register as:</Label>
                 <RadioGroup value={role} onValueChange={setRole} className="grid gap-2">
                   {["user", "doctor"].map((r) => (
@@ -234,7 +245,7 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 transition-all"
+              className="w-full bg-blue-600 hover:bg-blue-700 transition-all login-content"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -250,7 +261,7 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <p className="text-center mt-6 text-gray-600">
+          <p className="login-content text-center mt-6 text-gray-600">
             {isLogin ? "New here? " : "Already have an account? "}
             <button
               onClick={() => setIsLogin(!isLogin)}
