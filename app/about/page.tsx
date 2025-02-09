@@ -2,7 +2,7 @@
 import { useEffect, useRef } from "react"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Github, Linkedin } from "lucide-react"
 
 interface Developer {
@@ -439,24 +439,6 @@ export default function AboutUsPage() {
     }
   }, [])
 
-  // Additional utility functions for animation
-  const getRandomPosition = () => {
-    return {
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      rotation: Math.random() * 360
-    }
-  }
-
-  const createMedicalElement = (type: string, position: { x: number, y: number, rotation: number }) => {
-    const element = document.createElement('div')
-    element.className = `medical-${type}`
-    element.style.left = `${position.x}%`
-    element.style.top = `${position.y}%`
-    element.style.transform = `rotate(${position.rotation}deg)`
-    return element
-  }
-
   return (
     <div ref={containerRef} className="min-h-screen bg-white dark:bg-gray-900 relative overflow-hidden">
       {/* Background elements */}
@@ -468,7 +450,7 @@ export default function AboutUsPage() {
       <div className="container mx-auto px-4 py-16 relative z-10">
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="about-heading text-4xl md:text-6xl font-bold text-gray-900 dark:text-white">
+          <h1 className="about-heading text-4xl md:text-6xl font-bold text-gray-900 dark:text-white whitespace-nowrap overflow-hidden">
             Transforming Healthcare Through Technology
           </h1>
           <p className="mt-4 text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
@@ -476,31 +458,48 @@ export default function AboutUsPage() {
           </p>
         </div>
 
-        {/* Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          {[
-            { label: 'Healthcare Partners', value: '50+' },
-            { label: 'Patient Records Processed', value: '1M+' },
-            { label: 'Years of Experience', value: '10+' }
-          ].map((stat, index) => (
-            <Card key={index} className="text-center about-card perspective">
-              <CardContent className="p-6">
-                <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
-                  {stat.value}
-                </div>
-                <div className="text-gray-600 dark:text-gray-300">
-                  {stat.label}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        {/* Vision Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+          <Card className="about-card perspective">
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Our Vision</h2>
+              <p className="text-gray-600 dark:text-gray-300">
+                To revolutionize healthcare by integrating cutting-edge technology with compassionate care, ensuring better outcomes for patients worldwide.
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="about-card perspective">
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Our Commitment</h2>
+              <p className="text-gray-600 dark:text-gray-300">
+                We are committed to delivering innovative solutions that empower healthcare providers and improve patient experiences.
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Team Section */}
+        {/* Medical Team Section */}
+        <div className="mb-16">
+          <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">Our Medical Team</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { name: "Dr. Emily Carter", role: "Chief Medical Officer" },
+              { name: "Dr. Michael Lee", role: "Head of Research" },
+              { name: "Dr. Sarah Johnson", role: "Clinical Director" }
+            ].map((member, index) => (
+              <Card key={index} className="about-card perspective">
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">{member.name}</h3>
+                  <p className="text-gray-600 dark:text-gray-400">{member.role}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Developers Section */}
         <div ref={cardsRef}>
-          <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">
-            Meet Our Team
-          </h2>
+          <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">Our Developers</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {developers.map((dev, index) => (
               <Card key={index} className="developer-card perspective">
