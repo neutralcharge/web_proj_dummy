@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import gsap from 'gsap'
 import { Search, ShoppingCart, Plus, Pill, PillIcon as Capsule, Syringe, Thermometer, Activity, Heart, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
@@ -24,7 +24,7 @@ interface CartItem extends Medicine {
   quantity: number
 }
 
-// Enhanced medicine data
+// Medicine data
 const medicines: Medicine[] = [
   {
     id: 1,
@@ -109,44 +109,38 @@ const medicines: Medicine[] = [
 ]
 
 export default function PharmacyPage() {
-  // State management
   const [searchQuery, setSearchQuery] = useState('')
-  const [filteredMedicines, setFilteredMedicines] = useState<Medicine[]>(medicines)
   const [cart, setCart] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
-  const [showNotFound, setShowNotFound] = useState(false)
-  const [isSearching, setIsSearching] = useState(false)
-
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
+  
   // Refs for GSAP animations
   const headerRef = useRef(null)
   const cartButtonRef = useRef(null)
   const searchRef = useRef(null)
   const medicineRefs = useRef<(HTMLDivElement | null)[]>([])
   const floatingIconRefs = useRef<(HTMLDivElement | null)[]>([])
+  const animationInitialized = useRef(false)
 
   // Floating icons
   const floatingIcons = [Pill, Capsule, Syringe, Thermometer, Activity, Heart]
 
-  // Search functionality with debouncing
-  useEffect(() => {
-    const debounceTimeout = setTimeout(() => {
-      setIsSearching(true)
-      const searchTerm = searchQuery.toLowerCase()
-      const filtered = medicines.filter(medicine =>
-        medicine.name.toLowerCase().includes(searchTerm) ||
-        medicine.description.toLowerCase().includes(searchTerm) ||
-        medicine.category.toLowerCase().includes(searchTerm)
-      )
-      setFilteredMedicines(filtered)
-      setShowNotFound(searchTerm !== '' && filtered.length === 0)
-      setIsSearching(false)
-    }, 300)
-
-    return () => clearTimeout(debounceTimeout)
+  // Optimized search with useMemo
+  const filteredMedicines = useMemo(() => {
+    const searchTerm = searchQuery.toLowerCase().trim()
+    if (!searchTerm) return medicines
+    
+    return medicines.filter(medicine =>
+      medicine.name.toLowerCase().includes(searchTerm) ||
+      medicine.description.toLowerCase().includes(searchTerm) ||
+      medicine.category.toLowerCase().includes(searchTerm)
+    )
   }, [searchQuery])
 
-  // GSAP animations initialization
+  // Initialize GSAP animations only once
   useEffect(() => {
+    if (animationInitialized.current || !isInitialLoad) return
+    
     // Header animation
     gsap.from(headerRef.current, {
       y: -50,
@@ -173,20 +167,21 @@ export default function PharmacyPage() {
       delay: 0.4
     })
 
-    // Medicine cards stagger animation
-    if (!isSearching) {
-      gsap.from(medicineRefs.current, {
-        y: 50,
-        opacity: 0,
-        duration: 0.6,
-        stagger: 0.1,
-        ease: "power3.out",
-        delay: 0.6
-      })
-    }
+    // Medicine cards stagger animation (only on initial load)
+    gsap.from(medicineRefs.current, {
+      y: 50,
+      opacity: 0,
+      duration: 0.6,
+      stagger: 0.1,
+      ease: "power3.out",
+      delay: 0.6,
+      onComplete: () => setIsInitialLoad(false)
+    })
 
     // Floating icons animations
     floatingIconRefs.current.forEach((icon, index) => {
+      if (!icon) return
+      
       const randomX = Math.random() * window.innerWidth
       const randomDelay = index * 2
 
@@ -213,6 +208,8 @@ export default function PharmacyPage() {
       })
     })
 
+    animationInitialized.current = true
+
     return () => {
       gsap.killTweensOf([
         headerRef.current,
@@ -222,7 +219,7 @@ export default function PharmacyPage() {
         ...floatingIconRefs.current
       ])
     }
-  }, [])
+  }, [isInitialLoad])
 
   // Cart functions
   const addToCart = (medicine: Medicine) => {
@@ -238,7 +235,6 @@ export default function PharmacyPage() {
       return [...prevCart, { ...medicine, quantity: 1 }]
     })
 
-    // Animate cart button
     gsap.to(cartButtonRef.current, {
       scale: 1.2,
       duration: 0.2,
@@ -283,7 +279,6 @@ export default function PharmacyPage() {
       description: "Redirecting to secure payment gateway...",
       duration: 3000,
     })
-    // Add payment gateway integration here
     setIsCartOpen(false)
   }
 
@@ -337,25 +332,13 @@ export default function PharmacyPage() {
           </div>
         </div>
 
-        {/* Not Found Message */}
-        {showNotFound && (
-          <div className="text-center my-12">
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">
-              We couldn't find what you're looking for
-            </h3>
-            <p className="text-gray-600">
-              Try searching for a different medicine name, category, or description.
-            </p>
-          </div>
-        )}
-
         {/* Medicine Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredMedicines.map((medicine, index) => (
             <div
               key={medicine.id}
               ref={el => medicineRefs.current[index] = el}
-              className="transition-all duration-300 ease-in-out"
+              className="transition-all duration-300 ease-in-out opacity-100"
             >
               <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
                 <img
@@ -432,7 +415,8 @@ export default function PharmacyPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}>
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          >
                             +
                           </Button>
                         </div>
