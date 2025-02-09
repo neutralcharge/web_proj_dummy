@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { HeartPulse, UserCircle, Lock } from "lucide-react"
+import { useAuth } from "@/contexts/AuthContext"  // Make sure this path matches your project structure
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true)
