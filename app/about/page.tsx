@@ -1,73 +1,124 @@
 "use client"
-
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { gsap } from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function AboutUsPage() {
+  const containerRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
-    gsap.from(".about-content", {
+    gsap.registerPlugin(ScrollTrigger)
+    
+    // Animate heading
+    gsap.from(".about-heading", {
       opacity: 0,
-      y: 20,
-      duration: 0.8,
-      ease: "power3.out",
-      stagger: 0.2,
+      y: -50,
+      duration: 1,
+      ease: "back.out(1.7)"
     })
+
+    // Animate cards with scroll trigger
+    const cards = document.querySelectorAll(".about-card")
+    cards.forEach((card, index) => {
+      gsap.from(card, {
+        scrollTrigger: {
+          trigger: card,
+          start: "top bottom-=100",
+          toggleActions: "play none none reverse"
+        },
+        opacity: 0,
+        x: index % 2 === 0 ? -100 : 100,
+        duration: 1,
+        ease: "power3.out"
+      })
+    })
+
+    // Create moving background texture
+    const texture = document.querySelector(".background-texture")
+    if (texture) {
+      gsap.to(texture, {
+        backgroundPosition: "100% 100%",
+        duration: 20,
+        repeat: -1,
+        ease: "none"
+      })
+    }
   }, [])
 
   return (
-    <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-      <h1 className="about-content text-3xl font-bold text-center mb-8">About HealthBuddy</h1>
-      <div className="about-content space-y-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Our Mission</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>
-              At HealthBuddy, our mission is to make healthcare accessible, convenient, and personalized for everyone.
-              We strive to bridge the gap between patients and healthcare providers through innovative technology and
-              compassionate care.
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Our Vision</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>
-              We envision a world where quality healthcare is just a click away. Our platform aims to revolutionize the
-              healthcare industry by leveraging cutting-edge technology to provide seamless, efficient, and effective
-              medical services.
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Our Team</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>
-              HealthBuddy is powered by a diverse team of healthcare professionals, technologists, and innovators. Our
-              experts are committed to delivering the best possible healthcare experience for our users.
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Our Commitment</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>
-              We are dedicated to maintaining the highest standards of medical ethics, data privacy, and user
-              satisfaction. Your health and well-being are our top priorities, and we continuously strive to improve our
-              services based on user feedback and the latest advancements in healthcare technology.
-            </p>
-          </CardContent>
-        </Card>
+    <div ref={containerRef} className="min-h-screen relative overflow-hidden">
+      {/* Moving background texture */}
+      <div 
+        className="background-texture absolute inset-0 opacity-10 pointer-events-none"
+        style={{
+          backgroundImage: `radial-gradient(circle at 2px 2px, rgba(0,0,0,0.2) 1px, transparent 0)`,
+          backgroundSize: '32px 32px',
+        }}
+      />
+
+      <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8 relative">
+        <h1 className="about-heading text-4xl md:text-5xl font-bold text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">
+          About HealthBuddy
+        </h1>
+
+        <div className="space-y-12">
+          <Card className="about-card transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-2xl text-blue-600">Our Mission</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-lg leading-relaxed">
+                At HealthBuddy, our mission is to revolutionize healthcare accessibility through innovative technology. 
+                We believe that quality healthcare should be available to everyone, anywhere, at any time. Through our 
+                platform, we're breaking down traditional barriers and creating a seamless connection between patients 
+                and healthcare providers.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="about-card transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-2xl text-cyan-600">Our Vision</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-lg leading-relaxed">
+                We envision a future where healthcare is not just reactive, but proactive and personalized. By leveraging 
+                cutting-edge technology and artificial intelligence, we're creating a healthcare ecosystem that anticipates 
+                needs, provides timely interventions, and ensures optimal health outcomes for all our users.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="about-card transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-2xl text-blue-600">Our Team</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-lg leading-relaxed">
+                Behind HealthBuddy stands a diverse team of visionaries, including experienced healthcare professionals, 
+                innovative technologists, and dedicated customer experience specialists. Our team combines decades of 
+                medical expertise with cutting-edge technical knowledge to deliver a healthcare platform that truly 
+                understands and meets your needs.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="about-card transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-2xl text-cyan-600">Our Commitment</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-lg leading-relaxed">
+                Your health and privacy are our top priorities. We uphold the highest standards of medical ethics and 
+                data security, ensuring that your personal health information remains confidential and protected. We're 
+                constantly evolving, incorporating user feedback and the latest technological advancements to provide 
+                you with the best possible healthcare experience.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )
 }
-
