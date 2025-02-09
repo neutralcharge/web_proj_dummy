@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, useRef } from 'react'
+import gsap from 'gsap'
 import { Search, ShoppingCart, Plus, Pill, PillIcon as Capsule, Syringe, Thermometer, Activity, Heart, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -52,8 +52,104 @@ export default function PharmacyPage() {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [showNotFound, setShowNotFound] = useState(false)
 
-  // Floating animation elements
+  // Refs for GSAP animations
+  const headerRef = useRef(null)
+  const cartButtonRef = useRef(null)
+  const searchRef = useRef(null)
+  const medicineRefs = useRef<(HTMLDivElement | null)[]>([])
+  const floatingIconRefs = useRef<(HTMLDivElement | null)[]>([])
+
+  // Floating icons
   const floatingIcons = [Pill, Capsule, Syringe, Thermometer, Activity, Heart]
+
+  // Initialize GSAP animations
+  useEffect(() => {
+    // Header animation
+    gsap.from(headerRef.current, {
+      y: -50,
+      opacity: 0,
+      duration: 0.8,
+      ease: "power3.out"
+    })
+
+    // Cart button animation
+    gsap.from(cartButtonRef.current, {
+      x: 50,
+      opacity: 0,
+      duration: 0.8,
+      ease: "power3.out",
+      delay: 0.2
+    })
+
+    // Search bar animation
+    gsap.from(searchRef.current, {
+      y: 30,
+      opacity: 0,
+      duration: 0.8,
+      ease: "power3.out",
+      delay: 0.4
+    })
+
+    // Medicine cards stagger animation
+    gsap.from(medicineRefs.current, {
+      y: 50,
+      opacity: 0,
+      duration: 0.6,
+      stagger: 0.1,
+      ease: "power3.out",
+      delay: 0.6
+    })
+
+    // Floating icons animations
+    floatingIconRefs.current.forEach((icon, index) => {
+      const randomX = Math.random() * window.innerWidth
+      const randomDelay = index * 2
+
+      gsap.set(icon, {
+        x: randomX,
+        y: window.innerHeight + 100
+      })
+
+      gsap.to(icon, {
+        y: -100,
+        rotation: 360,
+        duration: 15 + Math.random() * 10,
+        repeat: -1,
+        delay: randomDelay,
+        ease: "none"
+      })
+
+      gsap.to(icon, {
+        x: `+=${Math.random() * 200 - 100}`,
+        duration: 5,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      })
+    })
+
+    // Cleanup function
+    return () => {
+      gsap.killTweensOf([
+        headerRef.current,
+        cartButtonRef.current,
+        searchRef.current,
+        ...medicineRefs.current,
+        ...floatingIconRefs.current
+      ])
+    }
+  }, [])
+
+  // Update animations when filtered medicines change
+  useEffect(() => {
+    gsap.from(medicineRefs.current, {
+      y: 30,
+      opacity: 0,
+      duration: 0.6,
+      stagger: 0.1,
+      ease: "power3.out"
+    })
+  }, [filteredMedicines])
 
   // Filter medicines based on search query
   useEffect(() => {
@@ -65,7 +161,7 @@ export default function PharmacyPage() {
     setShowNotFound(searchQuery !== '' && filtered.length === 0)
   }, [searchQuery])
 
-  // Add to cart function
+  // Add to cart with animation
   const addToCart = (medicine: Medicine) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.id === medicine.id)
@@ -78,6 +174,16 @@ export default function PharmacyPage() {
       }
       return [...prevCart, { ...medicine, quantity: 1 }]
     })
+
+    // Animate the cart button
+    gsap.to(cartButtonRef.current, {
+      scale: 1.2,
+      duration: 0.2,
+      yoyo: true,
+      repeat: 1,
+      ease: "power2.inOut"
+    })
+
     toast({
       title: "Added to Cart",
       description: `${medicine.name} has been added to your cart`,
@@ -95,7 +201,6 @@ export default function PharmacyPage() {
 
   // Proceed to payment
   const handleCheckout = () => {
-    // Implement payment gateway integration here
     toast({
       title: "Proceeding to Payment",
       description: "Redirecting to secure payment gateway...",
@@ -107,27 +212,13 @@ export default function PharmacyPage() {
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white relative overflow-hidden">
       {/* Floating Background Elements */}
       {floatingIcons.map((Icon, index) => (
-        <motion.div
+        <div
           key={index}
+          ref={el => floatingIconRefs.current[index] = el}
           className="absolute text-blue-500/10"
-          initial={{ y: '100vh' }}
-          animate={{
-            y: ['-100vh', '100vh'],
-            x: [
-              `${Math.random() * 100}vw`,
-              `${Math.random() * 100}vw`
-            ],
-            rotate: [0, 360]
-          }}
-          transition={{
-            duration: 20 + Math.random() * 10,
-            delay: index * 2,
-            repeat: Infinity,
-            ease: 'linear'
-          }}
         >
           <Icon size={48} />
-        </motion.div>
+        </div>
       ))}
 
       {/* Background Pattern */}
@@ -141,18 +232,10 @@ export default function PharmacyPage() {
       <div className="container mx-auto px-4 py-8 relative z-10">
         {/* Header Section */}
         <div className="flex justify-between items-center mb-8">
-          <motion.h1
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-3xl font-bold text-gray-800"
-          >
+          <h1 ref={headerRef} className="text-3xl font-bold text-gray-800">
             Online Pharmacy
-          </motion.h1>
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="relative"
-          >
+          </h1>
+          <div ref={cartButtonRef}>
             <Button
               variant="outline"
               className="flex items-center gap-2"
@@ -166,15 +249,11 @@ export default function PharmacyPage() {
                 </Badge>
               )}
             </Button>
-          </motion.div>
+          </div>
         </div>
 
         {/* Search Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-2xl mx-auto mb-12"
-        >
+        <div ref={searchRef} className="max-w-2xl mx-auto mb-12">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <Input
@@ -185,71 +264,56 @@ export default function PharmacyPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-        </motion.div>
+        </div>
 
         {/* Not Found Message */}
-        <AnimatePresence>
-          {showNotFound && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="text-center my-12"
-            >
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                We couldn't find what you're looking for
-              </h3>
-              <p className="text-gray-600">
-                We're sorry, but we couldn't find any medicines matching your search.
-                Please try a different search term or browse our categories.
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {showNotFound && (
+          <div className="text-center my-12">
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">
+              We couldn't find what you're looking for
+            </h3>
+            <p className="text-gray-600">
+              We're sorry, but we couldn't find any medicines matching your search.
+              Please try a different search term or browse our categories.
+            </p>
+          </div>
+        )}
 
         {/* Medicine Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <AnimatePresence>
-            {filteredMedicines.map((medicine) => (
-              <motion.div
-                key={medicine.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <motion.img
-                    src={medicine.image}
-                    alt={medicine.name}
-                    className="w-full h-48 object-cover"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                  <CardContent className="p-4">
-                    <h3 className="text-lg font-semibold mb-2">{medicine.name}</h3>
-                    <p className="text-gray-600 text-sm mb-2">{medicine.description}</p>
-                    <Badge variant="secondary" className="mb-2">
-                      {medicine.category}
-                    </Badge>
-                    <p className="text-lg font-bold text-blue-600">
-                      ${medicine.price.toFixed(2)}
-                    </p>
-                  </CardContent>
-                  <CardFooter className="p-4 pt-0">
-                    <Button
-                      className="w-full"
-                      onClick={() => addToCart(medicine)}
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add to Cart
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+          {filteredMedicines.map((medicine, index) => (
+            <div
+              key={medicine.id}
+              ref={el => medicineRefs.current[index] = el}
+            >
+              <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                <img
+                  src={medicine.image}
+                  alt={medicine.name}
+                  className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
+                />
+                <CardContent className="p-4">
+                  <h3 className="text-lg font-semibold mb-2">{medicine.name}</h3>
+                  <p className="text-gray-600 text-sm mb-2">{medicine.description}</p>
+                  <Badge variant="secondary" className="mb-2">
+                    {medicine.category}
+                  </Badge>
+                  <p className="text-lg font-bold text-blue-600">
+                    ${medicine.price.toFixed(2)}
+                  </p>
+                </CardContent>
+                <CardFooter className="p-4 pt-0">
+                  <Button
+                    className="w-full"
+                    onClick={() => addToCart(medicine)}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add to Cart
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+          ))}
         </div>
 
         {/* Cart Dialog */}
