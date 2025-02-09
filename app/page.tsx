@@ -21,14 +21,14 @@ function AnimatedBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const animationFrameId = useRef<number>();
-  const particleCount = useRef(50);
+  const particleCount = useRef(60);
 
   const config = {
     baseColor: [59, 130, 246] as const,
-    maxParticleSize: 5,
-    speedRange: 1,
+    maxParticleSize: 7,
+    speedRange: 0.7,
     opacityRange: { min: 0.1, max: 0.6 },
-    fadeEffect: 0.05,
+    fadeEffect: 0.06,
     symbolScale: 4,
   };
 
