@@ -404,7 +404,8 @@ export default function AboutUsPage() {
 
     // Morphing background animation
     const bg = document.querySelector('.morphing-bg')
-    gsap.to(bg, {
+    if (bg) {
+      gsap.to(bg, {
         background: [
           'radial-gradient(circle at 30% 70%, rgba(104, 171, 237, 0.1) 0%, transparent 50%)',
           'radial-gradient(circle at 70% 30%, rgba(104, 171, 237, 0.1) 0%, transparent 50%)'
