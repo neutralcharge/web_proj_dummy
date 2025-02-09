@@ -9,7 +9,8 @@ export default function PaymentSuccessPage() {
   const router = useRouter()
 
   useEffect(() => {
-    // Clear cart here if you're using localStorage or other state management
+    // Clear cart from localStorage if you're using it
+    localStorage.removeItem("cart")
   }, [])
 
   return (
