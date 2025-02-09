@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useState, useEffect } from "react"
 import { Search, ShoppingCart, Pill, AmbulanceIcon as FirstAid, Stethoscope } from "lucide-react"
@@ -16,7 +16,7 @@ interface CartItem extends Medicine {
   quantity: number
 }
 
-// Sample medicine data
+// Move the data to a separate constant
 const medicineData: Medicine[] = [
   {
     id: "1",
@@ -40,6 +40,78 @@ const medicineData: Medicine[] = [
     image: "/api/placeholder/200/200",
   },
 ]
+
+// Create a separate client component for the cart
+function Cart({ 
+  isOpen, 
+  onClose, 
+  items, 
+  onRemoveItem, 
+  onCheckout 
+}: { 
+  isOpen: boolean
+  onClose: () => void
+  items: CartItem[]
+  onRemoveItem: (id: string) => void
+  onCheckout: () => void
+}) {
+  const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+
+  if (!isOpen) return null
+
+  return (
+    <>
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 z-40"
+        onClick={onClose}
+      />
+      <div className="fixed right-0 top-0 h-full w-96 bg-white shadow-xl z-50 p-6">
+        <h2 className="text-2xl font-bold mb-6">Your Cart</h2>
+        {items.length > 0 ? (
+          <>
+            <div className="space-y-4 mb-6">
+              {items.map((item) => (
+                <div key={item.id} className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-medium">{item.name}</h3>
+                    <p className="text-sm text-gray-500">
+                      Quantity: {item.quantity}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="font-medium">
+                      ${(item.price * item.quantity).toFixed(2)}
+                    </span>
+                    <button
+                      onClick={() => onRemoveItem(item.id)}
+                      className="text-red-500 hover:text-red-600"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="border-t pt-4">
+              <div className="flex justify-between mb-6">
+                <span className="font-bold">Total:</span>
+                <span className="font-bold">${totalPrice.toFixed(2)}</span>
+              </div>
+              <button
+                onClick={onCheckout}
+                className="w-full bg-blue-500 text-white py-3 rounded-full hover:bg-blue-600 transition-colors"
+              >
+                Place Order
+              </button>
+            </div>
+          </>
+        ) : (
+          <p className="text-gray-500 text-center">Your cart is empty</p>
+        )}
+      </div>
+    </>
+  )
+}
 
 export default function PharmacyPage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -68,12 +140,16 @@ export default function PharmacyPage() {
     })
   }
 
-  // Calculate total price
-  const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
-
   // Remove from cart function
   const removeFromCart = (medicineId: string) => {
     setCart((prevCart) => prevCart.filter(item => item.id !== medicineId))
+  }
+
+  // Checkout function
+  const handleCheckout = () => {
+    alert('Thank you for your order! This is a demo application.')
+    setCart([])
+    setIsCartOpen(false)
   }
 
   return (
@@ -109,40 +185,31 @@ export default function PharmacyPage() {
 
         {/* Medicine Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {medicines.length > 0 ? (
-            medicines.map((medicine) => (
-              <div
-                key={medicine.id}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
-              >
-                <img
-                  src={medicine.image}
-                  alt={medicine.name}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold mb-2">{medicine.name}</h3>
-                  <p className="text-gray-600 mb-4">{medicine.description}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-blue-600">${medicine.price.toFixed(2)}</span>
-                    <button
-                      onClick={() => addToCart(medicine)}
-                      className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 transition-colors"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
+          {medicines.map((medicine) => (
+            <div
+              key={medicine.id}
+              className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+            >
+              <img
+                src={medicine.image}
+                alt={medicine.name}
+                className="w-full h-48 object-cover"
+              />
+              <div className="p-6">
+                <h3 className="text-xl font-semibold mb-2">{medicine.name}</h3>
+                <p className="text-gray-600 mb-4">{medicine.description}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-bold text-blue-600">${medicine.price.toFixed(2)}</span>
+                  <button
+                    onClick={() => addToCart(medicine)}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 transition-colors"
+                  >
+                    Add to Cart
+                  </button>
                 </div>
               </div>
-            ))
-          ) : (
-            <div className="col-span-full text-center py-12">
-              <div className="text-gray-500">
-                <p className="text-xl mb-2">We couldn't find any medicines matching your search.</p>
-                <p>Please try a different search term or browse our complete catalog.</p>
-              </div>
             </div>
-          )}
+          ))}
         </div>
 
         {/* Cart Button */}
@@ -158,63 +225,14 @@ export default function PharmacyPage() {
           )}
         </button>
 
-        {/* Cart Sidebar */}
-        {isCartOpen && (
-          <>
-            <div
-              className="fixed inset-0 bg-black bg-opacity-50 z-40"
-              onClick={() => setIsCartOpen(false)}
-            />
-            <div className="fixed right-0 top-0 h-full w-96 bg-white shadow-xl z-50 p-6">
-              <h2 className="text-2xl font-bold mb-6">Your Cart</h2>
-              {cart.length > 0 ? (
-                <>
-                  <div className="space-y-4 mb-6">
-                    {cart.map((item) => (
-                      <div key={item.id} className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-medium">{item.name}</h3>
-                          <p className="text-sm text-gray-500">
-                            Quantity: {item.quantity}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <span className="font-medium">
-                            ${(item.price * item.quantity).toFixed(2)}
-                          </span>
-                          <button
-                            onClick={() => removeFromCart(item.id)}
-                            className="text-red-500 hover:text-red-600"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="border-t pt-4">
-                    <div className="flex justify-between mb-6">
-                      <span className="font-bold">Total:</span>
-                      <span className="font-bold">${totalPrice.toFixed(2)}</span>
-                    </div>
-                    <button
-                      onClick={() => {
-                        alert('Thank you for your order! This is a demo application.')
-                        setCart([])
-                        setIsCartOpen(false)
-                      }}
-                      className="w-full bg-blue-500 text-white py-3 rounded-full hover:bg-blue-600 transition-colors"
-                    >
-                      Place Order
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <p className="text-gray-500 text-center">Your cart is empty</p>
-              )}
-            </div>
-          </>
-        )}
+        {/* Cart Component */}
+        <Cart
+          isOpen={isCartOpen}
+          onClose={() => setIsCartOpen(false)}
+          items={cart}
+          onRemoveItem={removeFromCart}
+          onCheckout={handleCheckout}
+        />
       </div>
     </div>
   )
