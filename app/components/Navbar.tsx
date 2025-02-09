@@ -12,7 +12,7 @@ const navItems = [
   { name: "Home", href: "/" },
   { name: "About Us", href: "/about" },
   { name: "Our Services", href: "/services" },
-  { name: "Online Pharmacy", href: "/Onlinepharmacy"},
+  { name: "Online Pharmacy", href: "/pharmacy"},
   { name: "Contact Us", href: "/contact" },
 ]
 
