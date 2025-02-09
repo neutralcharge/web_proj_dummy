@@ -42,7 +42,6 @@ const medicineData: Medicine[] = [
     price: 7.99,
     image: "/placeholder.svg?height=200&width=200",
   },
-  // Add more medicines as needed
 ]
 
 // Initialize Stripe
@@ -56,7 +55,9 @@ export default function PharmacyPage() {
 
   // Filter medicines based on search query
   useEffect(() => {
-    const filtered = medicineData.filter((medicine) => medicine.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    const filtered = medicineData.filter((medicine) => 
+      medicine.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
     setMedicines(filtered)
   }, [searchQuery])
 
@@ -65,7 +66,9 @@ export default function PharmacyPage() {
     setCart((prevCart) => {
       const existingItem = prevCart.find((item) => item.id === medicine.id)
       if (existingItem) {
-        return prevCart.map((item) => (item.id === medicine.id ? { ...item, quantity: item.quantity + 1 } : item))
+        return prevCart.map((item) => 
+          item.id === medicine.id ? { ...item, quantity: item.quantity + 1 } : item
+        )
       }
       return [...prevCart, { ...medicine, quantity: 1 }]
     })
@@ -203,9 +206,8 @@ export default function PharmacyPage() {
 
         {/* Cart Sidebar */}
         <AnimatePresence>
-          {isCartOpen &&
-            (
-              <>
+          {isCartOpen && (
+            <>
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.5 }}
@@ -254,11 +256,10 @@ export default function PharmacyPage() {
                   <p className="text-gray-500 text-center">Your cart is empty</p>
                 )}
               </motion.div>
-            </AnimatePresence>
-            )}
+            </>
+          )}
         </AnimatePresence>
       </div>
     </div>
   )
 }
-
