@@ -215,7 +215,7 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto text-center">
           <div className="mb-8">
             <h1 className="hero-title text-5xl md:text-7xl font-bold text-gray-800 mb-6 leading-tight">
-              Welcome to <span className="text-blue-600">HealthBuddy</span>
+              Welcome to <span className="text-blue-600">QuickCare</span>
             </h1>
           </div>
 
