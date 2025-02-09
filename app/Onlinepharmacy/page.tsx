@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { toast } from "@/components/ui/use-toast"
+import { useToast } from "@/components/ui/use-toast"
+import Link from 'next/link'
 
 // Types
 interface Medicine {
@@ -32,7 +33,7 @@ const medicines: Medicine[] = [
     description: "Pain reliever and fever reducer",
     price: 5.99,
     category: "Pain Relief",
-    image: "/placeholder.svg?height=200&width=200"
+    image: "/api/placeholder/200/200"
   },
   {
     id: 2,
@@ -40,78 +41,105 @@ const medicines: Medicine[] = [
     description: "Antibiotic for bacterial infections",
     price: 12.99,
     category: "Antibiotics",
-    image: "/placeholder.svg?height=200&width=200"
+    image: "/api/placeholder/200/200"
   },
-  // Add more medicines as needed
+  {
+    id: 3,
+    name: "Ibuprofen 400mg",
+    description: "Anti-inflammatory pain reliever",
+    price: 7.99,
+    category: "Pain Relief",
+    image: "/api/placeholder/200/200"
+  },
+  {
+    id: 4,
+    name: "Cetirizine 10mg",
+    description: "Antihistamine for allergies",
+    price: 8.99,
+    category: "Allergy",
+    image: "/api/placeholder/200/200"
+  }
 ]
 
 export default function PharmacyPage() {
+  const { toast } = useToast()
   const [searchQuery, setSearchQuery] = useState('')
   const [filteredMedicines, setFilteredMedicines] = useState<Medicine[]>(medicines)
   const [cart, setCart] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [showNotFound, setShowNotFound] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   // Refs for GSAP animations
-  const headerRef = useRef(null)
-  const cartButtonRef = useRef(null)
-  const searchRef = useRef(null)
-  const medicinesRef = useRef<HTMLDivElement[]>([])
-  const floatingIconsRef = useRef<HTMLDivElement[]>([])
+  const headerRef = useRef<HTMLDivElement>(null)
+  const cartButtonRef = useRef<HTMLDivElement>(null)
+  const searchRef = useRef<HTMLDivElement>(null)
+  const medicinesRef = useRef<(HTMLDivElement | null)[]>([])
+  const floatingIconsRef = useRef<(HTMLDivElement | null)[]>([])
 
   // Floating icons array
   const floatingIcons = [Pill, Capsule, Syringe, Thermometer, Activity, Heart]
 
   // Initialize GSAP animations
   useEffect(() => {
-    // Header animation
-    gsap.from(headerRef.current, {
-      opacity: 0,
-      y: -20,
-      duration: 0.8,
-      ease: "power2.out"
-    })
-
-    // Cart button animation
-    gsap.from(cartButtonRef.current, {
-      opacity: 0,
-      x: 20,
-      duration: 0.8,
-      ease: "power2.out"
-    })
-
-    // Search bar animation
-    gsap.from(searchRef.current, {
-      opacity: 0,
-      y: 20,
-      duration: 0.8,
-      delay: 0.2,
-      ease: "power2.out"
-    })
-
-    // Floating icons animations
-    floatingIconsRef.current.forEach((icon, index) => {
-      gsap.to(icon, {
-        y: '-200vh',
-        x: `random(0, 100)vw`,
-        rotation: 360,
-        duration: 20 + Math.random() * 10,
-        repeat: -1,
-        delay: index * 2,
-        ease: "none"
-      })
-    })
-
-    // Medicine cards animation
-    medicinesRef.current.forEach((card, index) => {
-      gsap.from(card, {
+    setIsLoading(false)
+    
+    const ctx = gsap.context(() => {
+      // Header animation
+      gsap.from(headerRef.current, {
         opacity: 0,
-        scale: 0.9,
-        duration: 0.5,
-        delay: 0.1 * index,
+        y: -20,
+        duration: 0.8,
         ease: "power2.out"
       })
+
+      // Cart button animation
+      gsap.from(cartButtonRef.current, {
+        opacity: 0,
+        x: 20,
+        duration: 0.8,
+        ease: "power2.out"
+      })
+
+      // Search bar animation
+      gsap.from(searchRef.current, {
+        opacity: 0,
+        y: 20,
+        duration: 0.8,
+        delay: 0.2,
+        ease: "power2.out"
+      })
+
+      // Floating icons animations
+      floatingIconsRef.current.forEach((icon, index) => {
+        if (icon) {
+          gsap.to(icon, {
+            y: '-200vh',
+            x: `random(0, 100)vw`,
+            rotation: 360,
+            duration: 20 + Math.random() * 10,
+            repeat: -1,
+            delay: index * 2,
+            ease: "none"
+          })
+        }
+      })
+
+      // Medicine cards animation
+      medicinesRef.current.forEach((card, index) => {
+        if (card) {
+          gsap.from(card, {
+            opacity: 0,
+            scale: 0.9,
+            duration: 0.5,
+            delay: 0.1 * index,
+            ease: "power2.out"
+          })
+        }
+      })
     })
+
+    return () => ctx.revert()
   }, [])
 
   // Filter medicines based on search query
@@ -149,16 +177,27 @@ export default function PharmacyPage() {
     setCart(prevCart => prevCart.filter(item => item.id !== medicineId))
   }
 
+  // Update quantity function
+  const updateQuantity = (medicineId: number, newQuantity: number) => {
+    if (newQuantity < 1) return
+    setCart(prevCart =>
+      prevCart.map(item =>
+        item.id === medicineId
+          ? { ...item, quantity: newQuantity }
+          : item
+      )
+    )
+  }
+
   // Calculate total price
   const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
-  // Proceed to payment
-  const handleCheckout = () => {
-    toast({
-      title: "Proceeding to Payment",
-      description: "Redirecting to secure payment gateway...",
-      duration: 3000,
-    })
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    )
   }
 
   return (
@@ -185,17 +224,11 @@ export default function PharmacyPage() {
 
       <div className="container mx-auto px-4 py-8 relative z-10">
         {/* Header Section */}
-        <div className="flex justify-between items-center mb-8">
-          <h1
-            ref={headerRef}
-            className="text-3xl font-bold text-gray-800"
-          >
+        <div ref={headerRef} className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">
             Online Pharmacy
           </h1>
-          <div
-            ref={cartButtonRef}
-            className="relative"
-          >
+          <div ref={cartButtonRef}>
             <Button
               variant="outline"
               className="flex items-center gap-2"
@@ -213,10 +246,7 @@ export default function PharmacyPage() {
         </div>
 
         {/* Search Section */}
-        <div
-          ref={searchRef}
-          className="max-w-2xl mx-auto mb-12"
-        >
+        <div ref={searchRef} className="max-w-2xl mx-auto mb-12">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <Input
@@ -236,7 +266,6 @@ export default function PharmacyPage() {
               We couldn't find what you're looking for
             </h3>
             <p className="text-gray-600">
-              We're sorry, but we couldn't find any medicines matching your search.
               Please try a different search term or browse our categories.
             </p>
           </div>
@@ -304,10 +333,24 @@ export default function PharmacyPage() {
                     >
                       <div>
                         <h4 className="font-medium">{item.name}</h4>
-                        <p className="text-sm text-gray-600">
-                          Quantity: {item.quantity}
-                        </p>
-                        <p className="text-blue-600 font-medium">
+                        <div className="flex items-center gap-2 mt-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          >
+                            -
+                          </Button>
+                          <span className="text-sm">{item.quantity}</span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          >
+                            +
+                          </Button>
+                        </div>
+                        <p className="text-blue-600 font-medium mt-1">
                           ${(item.price * item.quantity).toFixed(2)}
                         </p>
                       </div>
@@ -328,12 +371,11 @@ export default function PharmacyPage() {
                       ${totalPrice.toFixed(2)}
                     </span>
                   </div>
-                  <Button
-                    className="w-full"
-                    onClick={handleCheckout}
-                  >
-                    Proceed to Payment
-                  </Button>
+                  <Link href="/checkout" className="w-full">
+                    <Button className="w-full">
+                      Proceed to Checkout
+                    </Button>
+                  </Link>
                 </div>
               </>
             )}
