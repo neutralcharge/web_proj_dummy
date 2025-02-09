@@ -1,8 +1,4 @@
-"use client"
-
 import { useState, useEffect, useRef, useMemo } from "react"
-import { loadStripe } from "@stripe/stripe-js"
-import gsap from "gsap"
 import {
   Search,
   ShoppingCart,
@@ -120,20 +116,17 @@ const medicines: Medicine[] = [
   },
 ]
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
-
 export default function PharmacyPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [cart, setCart] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
 
-  // Refs for GSAP animations
+  // Refs for animations
   const headerRef = useRef(null)
   const cartButtonRef = useRef(null)
   const searchRef = useRef(null)
   const medicineRefs = useRef<(HTMLDivElement | null)[]>([])
   const floatingIconRefs = useRef<(HTMLDivElement | null)[]>([])
-  const animationInitialized = useRef(false)
 
   // Floating icons
   const floatingIcons = [Pill, Capsule, Syringe, Thermometer, Activity, Heart]
@@ -151,89 +144,6 @@ export default function PharmacyPage() {
     )
   }, [searchQuery])
 
-  // Initialize GSAP animations only once
-  useEffect(() => {
-    if (animationInitialized.current) return
-
-    // Header animation
-    gsap.from(headerRef.current, {
-      y: -50,
-      opacity: 0,
-      duration: 0.8,
-      ease: "power3.out",
-    })
-
-    // Cart button animation
-    gsap.from(cartButtonRef.current, {
-      x: 50,
-      opacity: 0,
-      duration: 0.8,
-      ease: "power3.out",
-      delay: 0.2,
-    })
-
-    // Search bar animation
-    gsap.from(searchRef.current, {
-      y: 30,
-      opacity: 0,
-      duration: 0.8,
-      ease: "power3.out",
-      delay: 0.4,
-    })
-
-    // Medicine cards stagger animation
-    gsap.from(medicineRefs.current, {
-      y: 50,
-      opacity: 0,
-      duration: 0.6,
-      stagger: 0.1,
-      ease: "power3.out",
-      delay: 0.6,
-    })
-
-    // Floating icons animations
-    floatingIconRefs.current.forEach((icon, index) => {
-      if (!icon) return
-
-      const randomX = Math.random() * window.innerWidth
-      const randomDelay = index * 2
-
-      gsap.set(icon, {
-        x: randomX,
-        y: window.innerHeight + 100,
-      })
-
-      gsap.to(icon, {
-        y: -100,
-        rotation: 360,
-        duration: 15 + Math.random() * 10,
-        repeat: -1,
-        delay: randomDelay,
-        ease: "none",
-      })
-
-      gsap.to(icon, {
-        x: `+=${Math.random() * 200 - 100}`,
-        duration: 5,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      })
-    })
-
-    animationInitialized.current = true
-
-    return () => {
-      gsap.killTweensOf([
-        headerRef.current,
-        cartButtonRef.current,
-        searchRef.current,
-        ...medicineRefs.current,
-        ...floatingIconRefs.current,
-      ])
-    }
-  }, [])
-
   // Cart functions
   const addToCart = (medicine: Medicine) => {
     setCart((prevCart) => {
@@ -242,14 +152,6 @@ export default function PharmacyPage() {
         return prevCart.map((item) => (item.id === medicine.id ? { ...item, quantity: item.quantity + 1 } : item))
       }
       return [...prevCart, { ...medicine, quantity: 1 }]
-    })
-
-    gsap.to(cartButtonRef.current, {
-      scale: 1.2,
-      duration: 0.2,
-      yoyo: true,
-      repeat: 1,
-      ease: "power2.inOut",
     })
 
     toast({
@@ -276,45 +178,12 @@ export default function PharmacyPage() {
   const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
   // Handle checkout process
-  const handleCheckout = async () => {
-    try {
-      const response = await fetch("/api/create-payment-intent", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          amount: totalPrice,
-        }),
-      })
-
-      const { clientSecret } = await response.json()
-
-      const stripe = await stripePromise
-      if (!stripe) throw new Error("Stripe failed to initialize")
-
-      const result = await stripe.confirmPayment({
-        clientSecret,
-        confirmParams: {
-          return_url: `${window.location.origin}/payment-success`,
-        },
-      })
-
-      if (result.error) {
-        toast({
-          title: "Payment Failed",
-          description: result.error.message,
-          variant: "destructive",
-        })
-      }
-    } catch (error) {
-      console.error("Payment error:", error)
-      toast({
-        title: "Error",
-        description: "Something went wrong with the payment",
-        variant: "destructive",
-      })
-    }
+  const handleCheckout = () => {
+    toast({
+      title: "Checkout",
+      description: "This is a demo. Checkout functionality will be implemented soon.",
+      duration: 3000,
+    })
   }
 
   return (
@@ -365,7 +234,7 @@ export default function PharmacyPage() {
             <div key={medicine.id} ref={(el) => (medicineRefs.current[index] = el)} className="opacity-100">
               <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
                 <img
-                  src={medicine.image || "/placeholder.svg"}
+                  src={medicine.image}
                   alt={medicine.name}
                   className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
                 />
@@ -408,7 +277,7 @@ export default function PharmacyPage() {
                     <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex items-center space-x-4">
                         <img
-                          src={item.image || "/placeholder.svg"}
+                          src={item.image}
                           alt={item.name}
                           className="w-16 h-16 object-cover rounded"
                         />
@@ -461,4 +330,3 @@ export default function PharmacyPage() {
     </div>
   )
 }
-
