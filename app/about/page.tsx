@@ -7,31 +7,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 export default function AboutUsPage() {
   const containerRef = useRef<HTMLDivElement>(null)
   const particlesRef = useRef<HTMLDivElement>(null)
+  const cardsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger)
     
-    // Create floating particles
+    // Create floating particles with smoother movement
     if (particlesRef.current) {
       for (let i = 0; i < 50; i++) {
         const particle = document.createElement('div')
         particle.className = 'particle'
         particle.style.setProperty('--x', `${Math.random() * 100}%`)
         particle.style.setProperty('--y', `${Math.random() * 100}%`)
-        particle.style.setProperty('--duration', `${Math.random() * 20 + 10}s`)
-        particle.style.setProperty('--delay', `-${Math.random() * 20}s`)
+        particle.style.setProperty('--duration', `${Math.random() * 30 + 15}s`) // Slower, smoother movement
+        particle.style.setProperty('--delay', `-${Math.random() * 30}s`)
         particlesRef.current.appendChild(particle)
       }
     }
 
-    // Animate heading with split text effect
+    // Smooth heading animation
     const heading = document.querySelector('.about-heading')
     if (heading && heading.textContent) {
       const text = heading.textContent
       heading.textContent = ''
       text.split('').forEach((char, i) => {
         const span = document.createElement('span')
-        span.textContent = char
+        span.textContent = char === ' ' ? '\u00A0' : char
         span.style.opacity = '0'
         span.style.display = 'inline-block'
         heading.appendChild(span)
@@ -39,92 +40,122 @@ export default function AboutUsPage() {
         gsap.to(span, {
           opacity: 1,
           rotateY: 360,
-          duration: 0.8,
-          delay: i * 0.1,
-          ease: "back.out(1.7)"
+          duration: 1.2,
+          delay: i * 0.05,
+          ease: "power4.out"
         })
       })
     }
 
-    // Animate cards with 3D effect
+    // Super smooth card animations
     const cards = document.querySelectorAll(".about-card")
+    const cardTimeline = gsap.timeline({
+      defaults: {
+        ease: "power3.out",
+        duration: 1.5
+      }
+    })
+
     cards.forEach((card, index) => {
-      // Initial animation
+      // Initial scroll animation
       gsap.from(card, {
         scrollTrigger: {
           trigger: card,
           start: "top bottom-=100",
-          end: "top center",
-          scrub: 1,
+          end: "top center+=100",
+          scrub: 1.5, // Smoother scrubbing
         },
         opacity: 0,
-        scale: 0.8,
-        rotateX: 20, // Reduced from 45
-        z: -100, // Reduced from -300
+        y: 100,
+        scale: 0.95,
         duration: 1.5,
+        ease: "power2.out"
       })
 
-      // Hover animation setup with reduced rotation
+      // Ultra-smooth hover animations
+      let currentRotation = { x: 0, y: 0 }
+      let rafId: number
+
+      const lerp = (start: number, end: number, factor: number) => {
+        return start + (end - start) * factor
+      }
+
+      const animateCard = (targetRotation: { x: number, y: number }) => {
+        const animate = () => {
+          currentRotation.x = lerp(currentRotation.x, targetRotation.x, 0.1)
+          currentRotation.y = lerp(currentRotation.y, targetRotation.y, 0.1)
+
+          gsap.set(card, {
+            rotateX: currentRotation.x,
+            rotateY: currentRotation.y,
+            transformPerspective: 1000,
+            transformOrigin: "center"
+          })
+
+          if (Math.abs(targetRotation.x - currentRotation.x) > 0.01 ||
+              Math.abs(targetRotation.y - currentRotation.y) > 0.01) {
+            rafId = requestAnimationFrame(animate)
+          }
+        }
+        
+        cancelAnimationFrame(rafId)
+        rafId = requestAnimationFrame(animate)
+      }
+
       card.addEventListener('mousemove', (e) => {
         const rect = (card as HTMLElement).getBoundingClientRect()
         const x = e.clientX - rect.left
         const y = e.clientY - rect.top
         const centerX = rect.width / 2
         const centerY = rect.height / 2
-        // Reduced rotation sensitivity from /10 to /25
-        const rotateX = (y - centerY) / 25
-        const rotateY = (centerX - x) / 25
+        
+        const rotateX = ((y - centerY) / centerY) * 5 // Max 5 degrees rotation
+        const rotateY = ((x - centerX) / centerX) * 5 // Max 5 degrees rotation
 
-        gsap.to(card, {
-          rotateX: rotateX,
-          rotateY: rotateY,
-          transformPerspective: 1000,
-          duration: 0.5,
-          ease: "power2.out"
-        })
+        animateCard({ x: -rotateX, y: rotateY })
       })
 
       card.addEventListener('mouseleave', () => {
-        gsap.to(card, {
-          rotateX: 0,
-          rotateY: 0,
-          duration: 0.5,
-          ease: "power2.out"
-        })
+        animateCard({ x: 0, y: 0 })
       })
+
+      // Cleanup
+      return () => {
+        cancelAnimationFrame(rafId)
+      }
     })
 
-    // Create morphing background effect
+    // Smoother background animation
     const bg = document.querySelector('.morphing-bg')
     if (bg) {
       gsap.to(bg, {
         backgroundPosition: '100% 100%',
-        duration: 20,
+        duration: 30, // Slower, smoother movement
         repeat: -1,
         ease: "none"
       })
     }
 
-    // Cleanup
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill())
     }
   }, [])
 
-  // Rest of the component remains the same...
   return (
     <div ref={containerRef} className="min-h-screen relative overflow-hidden perspective">
-      {/* Morphing background */}
-      <div className="morphing-bg absolute inset-0 opacity-20 pointer-events-none bg-gradient-to-br from-blue-500/30 to-cyan-500/30"
+      {/* Smoother morphing background */}
+      <div 
+        className="morphing-bg absolute inset-0 opacity-20 pointer-events-none transition-opacity duration-1000"
         style={{
           backgroundImage: `
-            radial-gradient(circle at 0% 0%, rgba(104, 171, 237, 0.1) 0%, transparent 50%),
-            radial-gradient(circle at 100% 0%, rgba(47, 124, 198, 0.1) 0%, transparent 50%),
-            radial-gradient(circle at 100% 100%, rgba(82, 157, 231, 0.1) 0%, transparent 50%),
-            radial-gradient(circle at 0% 100%, rgba(127, 185, 241, 0.1) 0%, transparent 50%)
+            radial-gradient(circle at 0% 0%, rgba(104, 171, 237, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 100% 0%, rgba(47, 124, 198, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 100% 100%, rgba(82, 157, 231, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 0% 100%, rgba(127, 185, 241, 0.15) 0%, transparent 50%)
           `,
           backgroundSize: '200% 200%',
-          filter: 'blur(80px)'
+          filter: 'blur(100px)',
+          transition: 'all 1s cubic-bezier(0.4, 0, 0.2, 1)'
         }}
       />
 
@@ -136,8 +167,9 @@ export default function AboutUsPage() {
           About HealthBuddy
         </h1>
 
-        <div className="space-y-16">
-          <Card className="about-card transform-gpu transition-all duration-300 hover:shadow-2xl bg-white/80 backdrop-blur-sm">
+        <div ref={cardsRef} className="space-y-16">
+          {/* Cards with smoother transitions */}
+          <Card className="about-card transform-gpu will-change-transform transition-[transform,shadow] duration-700 ease-out hover:shadow-2xl bg-white/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
                 Our Mission
@@ -153,7 +185,7 @@ export default function AboutUsPage() {
             </CardContent>
           </Card>
 
-          <Card className="about-card transform-gpu transition-all duration-300 hover:shadow-2xl bg-white/80 backdrop-blur-sm">
+          <Card className="about-card transform-gpu will-change-transform transition-[transform,shadow] duration-700 ease-out hover:shadow-2xl bg-white/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-500 bg-clip-text text-transparent">
                 Our Vision
@@ -168,7 +200,7 @@ export default function AboutUsPage() {
             </CardContent>
           </Card>
 
-          <Card className="about-card transform-gpu transition-all duration-300 hover:shadow-2xl bg-white/80 backdrop-blur-sm">
+          <Card className="about-card transform-gpu will-change-transform transition-[transform,shadow] duration-700 ease-out hover:shadow-2xl bg-white/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
                 Our Team
@@ -184,7 +216,7 @@ export default function AboutUsPage() {
             </CardContent>
           </Card>
 
-          <Card className="about-card transform-gpu transition-all duration-300 hover:shadow-2xl bg-white/80 backdrop-blur-sm">
+          <Card className="about-card transform-gpu will-change-transform transition-[transform,shadow] duration-700 ease-out hover:shadow-2xl bg-white/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-500 bg-clip-text text-transparent">
                 Our Commitment
