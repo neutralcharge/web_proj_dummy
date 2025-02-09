@@ -30,7 +30,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (username: string, password: string) => {
     try {
       // Here you would typically make an API call to verify credentials
-      // For this example, we'll just set the user directly
       const newUser = { 
         username, 
         role: "user" as const 
@@ -46,8 +45,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signup = async (username: string, password: string, role: "user" | "doctor") => {
     try {
-      // Here you would typically make an API call to create a new user
-      // For this example, we'll just set the user directly
       const newUser = { username, role }
       setUser(newUser)
       localStorage.setItem("user", JSON.stringify(newUser))
