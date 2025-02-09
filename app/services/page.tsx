@@ -136,9 +136,6 @@ export default function About() {
         <BackgroundElement key={index} icon={icon} />
       ))}
       <div className="max-w-6xl mx-auto relative z-10">
-        <h1 ref={titleRef} className="text-6xl font-bold text-center mb-12 text-blue-800 drop-shadow-lg">
-          About Us
-        </h1>
         <div className="bg-white/70 backdrop-blur-md rounded-3xl p-8 mb-12 shadow-xl border border-blue-200">
           <p className="text-xl text-gray-800 mb-6 leading-relaxed">
             We are dedicated to revolutionizing healthcare through innovative technology. Our mission is to make quality
