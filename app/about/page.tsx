@@ -6,66 +6,140 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function AboutUsPage() {
   const containerRef = useRef<HTMLDivElement>(null)
+  const particlesRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger)
     
-    // Animate heading
-    gsap.from(".about-heading", {
-      opacity: 0,
-      y: -50,
-      duration: 1,
-      ease: "back.out(1.7)"
-    })
+    // Create floating particles
+    if (particlesRef.current) {
+      for (let i = 0; i < 50; i++) {
+        const particle = document.createElement('div')
+        particle.className = 'particle'
+        particle.style.setProperty('--x', `${Math.random() * 100}%`)
+        particle.style.setProperty('--y', `${Math.random() * 100}%`)
+        particle.style.setProperty('--duration', `${Math.random() * 20 + 10}s`)
+        particle.style.setProperty('--delay', `-${Math.random() * 20}s`)
+        particlesRef.current.appendChild(particle)
+      }
+    }
 
-    // Animate cards with scroll trigger
+    // Animate heading with split text effect
+    const heading = document.querySelector('.about-heading')
+    if (heading && heading.textContent) {
+      const text = heading.textContent
+      heading.textContent = ''
+      text.split('').forEach((char, i) => {
+        const span = document.createElement('span')
+        span.textContent = char
+        span.style.opacity = '0'
+        span.style.display = 'inline-block'
+        heading.appendChild(span)
+        
+        gsap.to(span, {
+          opacity: 1,
+          rotateY: 360,
+          duration: 0.8,
+          delay: i * 0.1,
+          ease: "back.out(1.7)"
+        })
+      })
+    }
+
+    // Animate cards with 3D effect
     const cards = document.querySelectorAll(".about-card")
     cards.forEach((card, index) => {
+      // Initial animation
       gsap.from(card, {
         scrollTrigger: {
           trigger: card,
           start: "top bottom-=100",
-          toggleActions: "play none none reverse"
+          end: "top center",
+          scrub: 1,
         },
         opacity: 0,
-        x: index % 2 === 0 ? -100 : 100,
-        duration: 1,
-        ease: "power3.out"
+        scale: 0.8,
+        rotateX: 45,
+        z: -300,
+        duration: 1.5,
+      })
+
+      // Hover animation setup
+      card.addEventListener('mousemove', (e) => {
+        const rect = (card as HTMLElement).getBoundingClientRect()
+        const x = e.clientX - rect.left
+        const y = e.clientY - rect.top
+        const centerX = rect.width / 2
+        const centerY = rect.height / 2
+        const rotateX = (y - centerY) / 10
+        const rotateY = (centerX - x) / 10
+
+        gsap.to(card, {
+          rotateX: rotateX,
+          rotateY: rotateY,
+          transformPerspective: 1000,
+          duration: 0.5,
+          ease: "power2.out"
+        })
+      })
+
+      card.addEventListener('mouseleave', () => {
+        gsap.to(card, {
+          rotateX: 0,
+          rotateY: 0,
+          duration: 0.5,
+          ease: "power2.out"
+        })
       })
     })
 
-    // Create moving background texture
-    const texture = document.querySelector(".background-texture")
-    if (texture) {
-      gsap.to(texture, {
-        backgroundPosition: "100% 100%",
+    // Create morphing background effect
+    const bg = document.querySelector('.morphing-bg')
+    if (bg) {
+      gsap.to(bg, {
+        backgroundPosition: '100% 100%',
         duration: 20,
         repeat: -1,
         ease: "none"
       })
     }
+
+    // Cleanup
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill())
+    }
   }, [])
 
   return (
-    <div ref={containerRef} className="min-h-screen relative overflow-hidden">
-      {/* Moving background texture */}
-      <div 
-        className="background-texture absolute inset-0 opacity-10 pointer-events-none"
+    <div ref={containerRef} className="min-h-screen relative overflow-hidden perspective">
+      {/* Morphing background */}
+      <div className="morphing-bg absolute inset-0 opacity-20 pointer-events-none bg-gradient-to-br from-blue-500/30 to-cyan-500/30"
         style={{
-          backgroundImage: `radial-gradient(circle at 2px 2px, rgba(0,0,0,0.2) 1px, transparent 0)`,
-          backgroundSize: '32px 32px',
+          backgroundImage: `
+            radial-gradient(circle at 0% 0%, rgba(104, 171, 237, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 100% 0%, rgba(47, 124, 198, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 100% 100%, rgba(82, 157, 231, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 0% 100%, rgba(127, 185, 241, 0.1) 0%, transparent 50%)
+          `,
+          backgroundSize: '200% 200%',
+          filter: 'blur(80px)'
         }}
       />
 
-      <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8 relative">
-        <h1 className="about-heading text-4xl md:text-5xl font-bold text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">
+      {/* Floating particles container */}
+      <div ref={particlesRef} className="particles-container absolute inset-0 pointer-events-none" />
+
+      <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8 relative z-10">
+        <h1 className="about-heading text-5xl md:text-6xl font-bold text-center mb-16 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">
           About HealthBuddy
         </h1>
 
-        <div className="space-y-12">
-          <Card className="about-card transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+        <div className="space-y-16">
+          <Card className="about-card transform-gpu transition-all duration-300 hover:shadow-2xl bg-white/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-2xl text-blue-600">Our Mission</CardTitle>
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                Our Mission
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-lg leading-relaxed">
@@ -77,9 +151,11 @@ export default function AboutUsPage() {
             </CardContent>
           </Card>
 
-          <Card className="about-card transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+          <Card className="about-card transform-gpu transition-all duration-300 hover:shadow-2xl bg-white/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-2xl text-cyan-600">Our Vision</CardTitle>
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-500 bg-clip-text text-transparent">
+                Our Vision
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-lg leading-relaxed">
@@ -90,9 +166,11 @@ export default function AboutUsPage() {
             </CardContent>
           </Card>
 
-          <Card className="about-card transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+          <Card className="about-card transform-gpu transition-all duration-300 hover:shadow-2xl bg-white/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-2xl text-blue-600">Our Team</CardTitle>
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                Our Team
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-lg leading-relaxed">
@@ -104,9 +182,11 @@ export default function AboutUsPage() {
             </CardContent>
           </Card>
 
-          <Card className="about-card transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+          <Card className="about-card transform-gpu transition-all duration-300 hover:shadow-2xl bg-white/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-2xl text-cyan-600">Our Commitment</CardTitle>
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-500 bg-clip-text text-transparent">
+                Our Commitment
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-lg leading-relaxed">
