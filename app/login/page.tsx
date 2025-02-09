@@ -243,11 +243,12 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* Submit Button */}
-<Button 
-        type="submit"
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 mt-4"
-      >
+            {/* Single Submit Button */}
+            <Button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 login-content"
+              disabled={isLoading}
+            >
               {isLoading ? (
                 <div className="flex items-center justify-center gap-2">
                   <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -255,23 +256,6 @@ export default function LoginPage() {
                 </div>
               ) : (
                 isLogin ? "Sign In" : "Create Account"
-              )}
-            </Button>
-
-            <Button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 transition-all login-content"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Processing...
-                </div>
-              ) : isLogin ? (
-                "Secure Login"
-              ) : (
-                "Create Account"
               )}
             </Button>
           </form>
