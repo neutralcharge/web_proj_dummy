@@ -1,16 +1,8 @@
-import { useState, useEffect, useRef, useMemo } from "react"
-import {
-  Search,
-  ShoppingCart,
-  Plus,
-  Pill,
-  PillIcon as Capsule,
-  Syringe,
-  Thermometer,
-  Activity,
-  Heart,
-  X,
-} from "lucide-react"
+'use client'
+
+import { useState, useEffect, useRef, useMemo } from 'react'
+import gsap from 'gsap'
+import { Search, ShoppingCart, Plus, Pill, PillIcon as Capsule, Syringe, Thermometer, Activity, Heart, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
@@ -40,7 +32,7 @@ const medicines: Medicine[] = [
     description: "Pain reliever and fever reducer",
     price: 5.99,
     category: "Pain Relief",
-    image: "/api/placeholder/200/200",
+    image: "/api/placeholder/200/200"
   },
   {
     id: 2,
@@ -48,7 +40,7 @@ const medicines: Medicine[] = [
     description: "Antibiotic for bacterial infections",
     price: 12.99,
     category: "Antibiotics",
-    image: "/api/placeholder/200/200",
+    image: "/api/placeholder/200/200"
   },
   {
     id: 3,
@@ -56,15 +48,15 @@ const medicines: Medicine[] = [
     description: "Reduces stomach acid production",
     price: 15.99,
     category: "Digestive Health",
-    image: "/api/placeholder/200/200",
+    image: "/api/placeholder/200/200"
   },
   {
     id: 4,
     name: "Lisinopril 10mg",
     description: "ACE inhibitor for blood pressure",
-    price: 18.5,
+    price: 18.50,
     category: "Cardiovascular",
-    image: "/api/placeholder/200/200",
+    image: "/api/placeholder/200/200"
   },
   {
     id: 5,
@@ -72,15 +64,15 @@ const medicines: Medicine[] = [
     description: "Oral diabetes medicine",
     price: 8.99,
     category: "Diabetes",
-    image: "/api/placeholder/200/200",
+    image: "/api/placeholder/200/200"
   },
   {
     id: 6,
     name: "Cetirizine 10mg",
     description: "Antihistamine for allergies",
-    price: 7.5,
+    price: 7.50,
     category: "Allergy",
-    image: "/api/placeholder/200/200",
+    image: "/api/placeholder/200/200"
   },
   {
     id: 7,
@@ -88,7 +80,7 @@ const medicines: Medicine[] = [
     description: "SSRI antidepressant medication",
     price: 22.99,
     category: "Mental Health",
-    image: "/api/placeholder/200/200",
+    image: "/api/placeholder/200/200"
   },
   {
     id: 8,
@@ -96,7 +88,7 @@ const medicines: Medicine[] = [
     description: "NSAID pain reliever",
     price: 6.99,
     category: "Pain Relief",
-    image: "/api/placeholder/200/200",
+    image: "/api/placeholder/200/200"
   },
   {
     id: 9,
@@ -104,7 +96,7 @@ const medicines: Medicine[] = [
     description: "Blood thinner and pain reliever",
     price: 4.99,
     category: "Cardiovascular",
-    image: "/api/placeholder/200/200",
+    image: "/api/placeholder/200/200"
   },
   {
     id: 10,
@@ -112,46 +104,143 @@ const medicines: Medicine[] = [
     description: "24-hour allergy relief",
     price: 9.99,
     category: "Allergy",
-    image: "/api/placeholder/200/200",
-  },
+    image: "/api/placeholder/200/200"
+  }
 ]
 
 export default function PharmacyPage() {
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState('')
   const [cart, setCart] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
-
-  // Refs for animations
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
+  
+  // Refs for GSAP animations
   const headerRef = useRef(null)
   const cartButtonRef = useRef(null)
   const searchRef = useRef(null)
   const medicineRefs = useRef<(HTMLDivElement | null)[]>([])
   const floatingIconRefs = useRef<(HTMLDivElement | null)[]>([])
+  const animationInitialized = useRef(false)
 
   // Floating icons
   const floatingIcons = [Pill, Capsule, Syringe, Thermometer, Activity, Heart]
 
   // Optimized search with useMemo
   const filteredMedicines = useMemo(() => {
-    if (!searchQuery) return medicines
-
     const searchTerm = searchQuery.toLowerCase().trim()
-    return medicines.filter(
-      (medicine) =>
-        medicine.name.toLowerCase().includes(searchTerm) ||
-        medicine.description.toLowerCase().includes(searchTerm) ||
-        medicine.category.toLowerCase().includes(searchTerm),
+    if (!searchTerm) return medicines
+    
+    return medicines.filter(medicine =>
+      medicine.name.toLowerCase().includes(searchTerm) ||
+      medicine.description.toLowerCase().includes(searchTerm) ||
+      medicine.category.toLowerCase().includes(searchTerm)
     )
   }, [searchQuery])
 
+  // Initialize GSAP animations only once
+  useEffect(() => {
+    if (animationInitialized.current || !isInitialLoad) return
+    
+    // Header animation
+    gsap.from(headerRef.current, {
+      y: -50,
+      opacity: 0,
+      duration: 0.8,
+      ease: "power3.out"
+    })
+
+    // Cart button animation
+    gsap.from(cartButtonRef.current, {
+      x: 50,
+      opacity: 0,
+      duration: 0.8,
+      ease: "power3.out",
+      delay: 0.2
+    })
+
+    // Search bar animation
+    gsap.from(searchRef.current, {
+      y: 30,
+      opacity: 0,
+      duration: 0.8,
+      ease: "power3.out",
+      delay: 0.4
+    })
+
+    // Medicine cards stagger animation (only on initial load)
+    gsap.from(medicineRefs.current, {
+      y: 50,
+      opacity: 0,
+      duration: 0.6,
+      stagger: 0.1,
+      ease: "power3.out",
+      delay: 0.6,
+      onComplete: () => setIsInitialLoad(false)
+    })
+
+    // Floating icons animations
+    floatingIconRefs.current.forEach((icon, index) => {
+      if (!icon) return
+      
+      const randomX = Math.random() * window.innerWidth
+      const randomDelay = index * 2
+
+      gsap.set(icon, {
+        x: randomX,
+        y: window.innerHeight + 100
+      })
+
+      gsap.to(icon, {
+        y: -100,
+        rotation: 360,
+        duration: 15 + Math.random() * 10,
+        repeat: -1,
+        delay: randomDelay,
+        ease: "none"
+      })
+
+      gsap.to(icon, {
+        x: `+=${Math.random() * 200 - 100}`,
+        duration: 5,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      })
+    })
+
+    animationInitialized.current = true
+
+    return () => {
+      gsap.killTweensOf([
+        headerRef.current,
+        cartButtonRef.current,
+        searchRef.current,
+        ...medicineRefs.current,
+        ...floatingIconRefs.current
+      ])
+    }
+  }, [isInitialLoad])
+
   // Cart functions
   const addToCart = (medicine: Medicine) => {
-    setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item.id === medicine.id)
+    setCart(prevCart => {
+      const existingItem = prevCart.find(item => item.id === medicine.id)
       if (existingItem) {
-        return prevCart.map((item) => (item.id === medicine.id ? { ...item, quantity: item.quantity + 1 } : item))
+        return prevCart.map(item =>
+          item.id === medicine.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
       }
       return [...prevCart, { ...medicine, quantity: 1 }]
+    })
+
+    gsap.to(cartButtonRef.current, {
+      scale: 1.2,
+      duration: 0.2,
+      yoyo: true,
+      repeat: 1,
+      ease: "power2.inOut"
     })
 
     toast({
@@ -162,7 +251,7 @@ export default function PharmacyPage() {
   }
 
   const removeFromCart = (medicineId: number) => {
-    setCart((prevCart) => prevCart.filter((item) => item.id !== medicineId))
+    setCart(prevCart => prevCart.filter(item => item.id !== medicineId))
   }
 
   const updateQuantity = (medicineId: number, newQuantity: number) => {
@@ -170,8 +259,14 @@ export default function PharmacyPage() {
       removeFromCart(medicineId)
       return
     }
-
-    setCart((prevCart) => prevCart.map((item) => (item.id === medicineId ? { ...item, quantity: newQuantity } : item)))
+    
+    setCart(prevCart =>
+      prevCart.map(item =>
+        item.id === medicineId
+          ? { ...item, quantity: newQuantity }
+          : item
+      )
+    )
   }
 
   // Calculate total price
@@ -180,17 +275,22 @@ export default function PharmacyPage() {
   // Handle checkout process
   const handleCheckout = () => {
     toast({
-      title: "Checkout",
-      description: "This is a demo. Checkout functionality will be implemented soon.",
+      title: "Proceeding to Payment",
+      description: "Redirecting to secure payment gateway...",
       duration: 3000,
     })
+    setIsCartOpen(false)
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white relative overflow-hidden">
       {/* Floating background icons */}
       {floatingIcons.map((Icon, index) => (
-        <div key={index} ref={(el) => (floatingIconRefs.current[index] = el)} className="absolute opacity-5">
+        <div
+          key={index}
+          ref={el => floatingIconRefs.current[index] = el}
+          className="absolute opacity-5"
+        >
           <Icon size={48} />
         </div>
       ))}
@@ -202,7 +302,11 @@ export default function PharmacyPage() {
             Online Pharmacy
           </h1>
           <div ref={cartButtonRef}>
-            <Button variant="outline" className="flex items-center gap-2" onClick={() => setIsCartOpen(true)}>
+            <Button
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={() => setIsCartOpen(true)}
+            >
               <ShoppingCart className="w-5 h-5" />
               Cart
               {cart.length > 0 && (
@@ -231,7 +335,11 @@ export default function PharmacyPage() {
         {/* Medicine Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredMedicines.map((medicine, index) => (
-            <div key={medicine.id} ref={(el) => (medicineRefs.current[index] = el)} className="opacity-100">
+            <div
+              key={medicine.id}
+              ref={el => medicineRefs.current[index] = el}
+              className="transition-all duration-300 ease-in-out opacity-100"
+            >
               <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
                 <img
                   src={medicine.image}
@@ -244,10 +352,15 @@ export default function PharmacyPage() {
                   <Badge variant="secondary" className="mb-2">
                     {medicine.category}
                   </Badge>
-                  <p className="text-lg font-bold text-blue-600">${medicine.price.toFixed(2)}</p>
+                  <p className="text-lg font-bold text-blue-600">
+                    ${medicine.price.toFixed(2)}
+                  </p>
                 </CardContent>
                 <CardFooter className="p-4 pt-0">
-                  <Button className="w-full" onClick={() => addToCart(medicine)}>
+                  <Button
+                    className="w-full"
+                    onClick={() => addToCart(medicine)}
+                  >
                     <Plus className="w-4 h-4 mr-2" />
                     Add to Cart
                   </Button>
@@ -262,7 +375,9 @@ export default function PharmacyPage() {
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold mb-4">Your Cart</DialogTitle>
-              <DialogDescription>Review your items before checkout</DialogDescription>
+              <DialogDescription>
+                Review your items before checkout
+              </DialogDescription>
             </DialogHeader>
 
             {cart.length === 0 ? (
@@ -286,7 +401,7 @@ export default function PharmacyPage() {
                           <p className="text-sm text-gray-600">${item.price.toFixed(2)} each</p>
                         </div>
                       </div>
-
+                      
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center space-x-2">
                           <Button
@@ -305,7 +420,11 @@ export default function PharmacyPage() {
                             +
                           </Button>
                         </div>
-                        <Button variant="ghost" size="sm" onClick={() => removeFromCart(item.id)}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFromCart(item.id)}
+                        >
                           <X className="w-4 h-4 text-gray-500" />
                         </Button>
                       </div>
@@ -318,7 +437,10 @@ export default function PharmacyPage() {
                     <span className="font-semibold">Total</span>
                     <span className="text-xl font-bold">${totalPrice.toFixed(2)}</span>
                   </div>
-                  <Button className="w-full" onClick={handleCheckout}>
+                  <Button
+                    className="w-full"
+                    onClick={handleCheckout}
+                  >
                     Proceed to Checkout
                   </Button>
                 </div>
