@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import gsap from 'gsap'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Search, ShoppingCart, Plus, Pill, PillIcon as Capsule, Syringe, Thermometer, Activity, Heart, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,7 +24,7 @@ interface CartItem extends Medicine {
   quantity: number
 }
 
-// Enhanced medicine data
+// Sample medicine data
 const medicines: Medicine[] = [
   {
     id: 1,
@@ -32,7 +32,7 @@ const medicines: Medicine[] = [
     description: "Pain reliever and fever reducer",
     price: 5.99,
     category: "Pain Relief",
-    image: "/api/placeholder/200/200"
+    image: "/placeholder.svg?height=200&width=200"
   },
   {
     id: 2,
@@ -40,191 +40,32 @@ const medicines: Medicine[] = [
     description: "Antibiotic for bacterial infections",
     price: 12.99,
     category: "Antibiotics",
-    image: "/api/placeholder/200/200"
+    image: "/placeholder.svg?height=200&width=200"
   },
-  {
-    id: 3,
-    name: "Omeprazole 20mg",
-    description: "Reduces stomach acid production",
-    price: 15.99,
-    category: "Digestive Health",
-    image: "/api/placeholder/200/200"
-  },
-  {
-    id: 4,
-    name: "Lisinopril 10mg",
-    description: "ACE inhibitor for blood pressure",
-    price: 18.50,
-    category: "Cardiovascular",
-    image: "/api/placeholder/200/200"
-  },
-  {
-    id: 5,
-    name: "Metformin 500mg",
-    description: "Oral diabetes medicine",
-    price: 8.99,
-    category: "Diabetes",
-    image: "/api/placeholder/200/200"
-  },
-  {
-    id: 6,
-    name: "Cetirizine 10mg",
-    description: "Antihistamine for allergies",
-    price: 7.50,
-    category: "Allergy",
-    image: "/api/placeholder/200/200"
-  },
-  {
-    id: 7,
-    name: "Sertraline 50mg",
-    description: "SSRI antidepressant medication",
-    price: 22.99,
-    category: "Mental Health",
-    image: "/api/placeholder/200/200"
-  },
-  {
-    id: 8,
-    name: "Ibuprofen 400mg",
-    description: "NSAID pain reliever",
-    price: 6.99,
-    category: "Pain Relief",
-    image: "/api/placeholder/200/200"
-  },
-  {
-    id: 9,
-    name: "Aspirin 81mg",
-    description: "Blood thinner and pain reliever",
-    price: 4.99,
-    category: "Cardiovascular",
-    image: "/api/placeholder/200/200"
-  },
-  {
-    id: 10,
-    name: "Loratadine 10mg",
-    description: "24-hour allergy relief",
-    price: 9.99,
-    category: "Allergy",
-    image: "/api/placeholder/200/200"
-  }
+  // Add more medicines as needed
 ]
 
 export default function PharmacyPage() {
-  // State management
   const [searchQuery, setSearchQuery] = useState('')
   const [filteredMedicines, setFilteredMedicines] = useState<Medicine[]>(medicines)
   const [cart, setCart] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [showNotFound, setShowNotFound] = useState(false)
-  const [isSearching, setIsSearching] = useState(false)
 
-  // Refs for GSAP animations
-  const headerRef = useRef(null)
-  const cartButtonRef = useRef(null)
-  const searchRef = useRef(null)
-  const medicineRefs = useRef<(HTMLDivElement | null)[]>([])
-  const floatingIconRefs = useRef<(HTMLDivElement | null)[]>([])
-
-  // Floating icons
+  // Floating animation elements
   const floatingIcons = [Pill, Capsule, Syringe, Thermometer, Activity, Heart]
 
-  // Search functionality with debouncing
+  // Filter medicines based on search query
   useEffect(() => {
-    const debounceTimeout = setTimeout(() => {
-      setIsSearching(true)
-      const searchTerm = searchQuery.toLowerCase()
-      const filtered = medicines.filter(medicine =>
-        medicine.name.toLowerCase().includes(searchTerm) ||
-        medicine.description.toLowerCase().includes(searchTerm) ||
-        medicine.category.toLowerCase().includes(searchTerm)
-      )
-      setFilteredMedicines(filtered)
-      setShowNotFound(searchTerm !== '' && filtered.length === 0)
-      setIsSearching(false)
-    }, 300)
-
-    return () => clearTimeout(debounceTimeout)
+    const filtered = medicines.filter(medicine =>
+      medicine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      medicine.description.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    setFilteredMedicines(filtered)
+    setShowNotFound(searchQuery !== '' && filtered.length === 0)
   }, [searchQuery])
 
-  // GSAP animations initialization
-  useEffect(() => {
-    // Header animation
-    gsap.from(headerRef.current, {
-      y: -50,
-      opacity: 0,
-      duration: 0.8,
-      ease: "power3.out"
-    })
-
-    // Cart button animation
-    gsap.from(cartButtonRef.current, {
-      x: 50,
-      opacity: 0,
-      duration: 0.8,
-      ease: "power3.out",
-      delay: 0.2
-    })
-
-    // Search bar animation
-    gsap.from(searchRef.current, {
-      y: 30,
-      opacity: 0,
-      duration: 0.8,
-      ease: "power3.out",
-      delay: 0.4
-    })
-
-    // Medicine cards stagger animation
-    if (!isSearching) {
-      gsap.from(medicineRefs.current, {
-        y: 50,
-        opacity: 0,
-        duration: 0.6,
-        stagger: 0.1,
-        ease: "power3.out",
-        delay: 0.6
-      })
-    }
-
-    // Floating icons animations
-    floatingIconRefs.current.forEach((icon, index) => {
-      const randomX = Math.random() * window.innerWidth
-      const randomDelay = index * 2
-
-      gsap.set(icon, {
-        x: randomX,
-        y: window.innerHeight + 100
-      })
-
-      gsap.to(icon, {
-        y: -100,
-        rotation: 360,
-        duration: 15 + Math.random() * 10,
-        repeat: -1,
-        delay: randomDelay,
-        ease: "none"
-      })
-
-      gsap.to(icon, {
-        x: `+=${Math.random() * 200 - 100}`,
-        duration: 5,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut"
-      })
-    })
-
-    return () => {
-      gsap.killTweensOf([
-        headerRef.current,
-        cartButtonRef.current,
-        searchRef.current,
-        ...medicineRefs.current,
-        ...floatingIconRefs.current
-      ])
-    }
-  }, [])
-
-  // Cart functions
+  // Add to cart function
   const addToCart = (medicine: Medicine) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.id === medicine.id)
@@ -237,16 +78,6 @@ export default function PharmacyPage() {
       }
       return [...prevCart, { ...medicine, quantity: 1 }]
     })
-
-    // Animate cart button
-    gsap.to(cartButtonRef.current, {
-      scale: 1.2,
-      duration: 0.2,
-      yoyo: true,
-      repeat: 1,
-      ease: "power2.inOut"
-    })
-
     toast({
       title: "Added to Cart",
       description: `${medicine.name} has been added to your cart`,
@@ -254,59 +85,74 @@ export default function PharmacyPage() {
     })
   }
 
+  // Remove from cart function
   const removeFromCart = (medicineId: number) => {
     setCart(prevCart => prevCart.filter(item => item.id !== medicineId))
-  }
-
-  const updateQuantity = (medicineId: number, newQuantity: number) => {
-    if (newQuantity < 1) {
-      removeFromCart(medicineId)
-      return
-    }
-    
-    setCart(prevCart =>
-      prevCart.map(item =>
-        item.id === medicineId
-          ? { ...item, quantity: newQuantity }
-          : item
-      )
-    )
   }
 
   // Calculate total price
   const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
-  // Handle checkout process
+  // Proceed to payment
   const handleCheckout = () => {
+    // Implement payment gateway integration here
     toast({
       title: "Proceeding to Payment",
       description: "Redirecting to secure payment gateway...",
       duration: 3000,
     })
-    // Add payment gateway integration here
-    setIsCartOpen(false)
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white relative overflow-hidden">
-      {/* Floating background icons */}
+      {/* Floating Background Elements */}
       {floatingIcons.map((Icon, index) => (
-        <div
+        <motion.div
           key={index}
-          ref={el => floatingIconRefs.current[index] = el}
-          className="absolute opacity-5"
+          className="absolute text-blue-500/10"
+          initial={{ y: '100vh' }}
+          animate={{
+            y: ['-100vh', '100vh'],
+            x: [
+              `${Math.random() * 100}vw`,
+              `${Math.random() * 100}vw`
+            ],
+            rotate: [0, 360]
+          }}
+          transition={{
+            duration: 20 + Math.random() * 10,
+            delay: index * 2,
+            repeat: Infinity,
+            ease: 'linear'
+          }}
         >
           <Icon size={48} />
-        </div>
+        </motion.div>
       ))}
+
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-repeat opacity-5"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0v60M60 30H0' stroke='%230000FF' fill='none'/%3E%3C/svg%3E")`,
+          backgroundSize: '30px 30px'
+        }}
+      />
 
       <div className="container mx-auto px-4 py-8 relative z-10">
         {/* Header Section */}
         <div className="flex justify-between items-center mb-8">
-          <h1 ref={headerRef} className="text-3xl font-bold text-gray-800">
+          <motion.h1
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-3xl font-bold text-gray-800"
+          >
             Online Pharmacy
-          </h1>
-          <div ref={cartButtonRef}>
+          </motion.h1>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="relative"
+          >
             <Button
               variant="outline"
               className="flex items-center gap-2"
@@ -320,83 +166,101 @@ export default function PharmacyPage() {
                 </Badge>
               )}
             </Button>
-          </div>
+          </motion.div>
         </div>
 
         {/* Search Section */}
-        <div ref={searchRef} className="max-w-2xl mx-auto mb-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-2xl mx-auto mb-12"
+        >
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <Input
               type="search"
-              placeholder="Search by name, category, or description..."
+              placeholder="Search for medicines..."
               className="w-full pl-10 pr-4 py-3 rounded-lg"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-        </div>
+        </motion.div>
 
         {/* Not Found Message */}
-        {showNotFound && (
-          <div className="text-center my-12">
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">
-              We couldn't find what you're looking for
-            </h3>
-            <p className="text-gray-600">
-              Try searching for a different medicine name, category, or description.
-            </p>
-          </div>
-        )}
+        <AnimatePresence>
+          {showNotFound && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="text-center my-12"
+            >
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                We couldn't find what you're looking for
+              </h3>
+              <p className="text-gray-600">
+                We're sorry, but we couldn't find any medicines matching your search.
+                Please try a different search term or browse our categories.
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Medicine Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredMedicines.map((medicine, index) => (
-            <div
-              key={medicine.id}
-              ref={el => medicineRefs.current[index] = el}
-              className="transition-all duration-300 ease-in-out"
-            >
-              <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <img
-                  src={medicine.image}
-                  alt={medicine.name}
-                  className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
-                />
-                <CardContent className="p-4">
-                  <h3 className="text-lg font-semibold mb-2">{medicine.name}</h3>
-                  <p className="text-gray-600 text-sm mb-2">{medicine.description}</p>
-                  <Badge variant="secondary" className="mb-2">
-                    {medicine.category}
-                  </Badge>
-                  <p className="text-lg font-bold text-blue-600">
-                    ${medicine.price.toFixed(2)}
-                  </p>
-                </CardContent>
-                <CardFooter className="p-4 pt-0">
-                  <Button
-                    className="w-full"
-                    onClick={() => addToCart(medicine)}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add to Cart
-                  </Button>
-                </CardFooter>
-              </Card>
-            </div>
-          ))}
+          <AnimatePresence>
+            {filteredMedicines.map((medicine) => (
+              <motion.div
+                key={medicine.id}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <motion.img
+                    src={medicine.image}
+                    alt={medicine.name}
+                    className="w-full h-48 object-cover"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                  <CardContent className="p-4">
+                    <h3 className="text-lg font-semibold mb-2">{medicine.name}</h3>
+                    <p className="text-gray-600 text-sm mb-2">{medicine.description}</p>
+                    <Badge variant="secondary" className="mb-2">
+                      {medicine.category}
+                    </Badge>
+                    <p className="text-lg font-bold text-blue-600">
+                      ${medicine.price.toFixed(2)}
+                    </p>
+                  </CardContent>
+                  <CardFooter className="p-4 pt-0">
+                    <Button
+                      className="w-full"
+                      onClick={() => addToCart(medicine)}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add to Cart
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
 
         {/* Cart Dialog */}
         <Dialog open={isCartOpen} onOpenChange={setIsCartOpen}>
-          <DialogContent className="sm:max-w-[600px]">
+          <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold mb-4">Your Cart</DialogTitle>
+              <DialogTitle>Your Cart</DialogTitle>
               <DialogDescription>
                 Review your items before checkout
               </DialogDescription>
             </DialogHeader>
-
             {cart.length === 0 ? (
               <div className="text-center py-8">
                 <ShoppingCart className="w-12 h-12 mx-auto text-gray-400 mb-4" />
@@ -404,61 +268,43 @@ export default function PharmacyPage() {
               </div>
             ) : (
               <>
-                <div className="space-y-4 max-h-[400px] overflow-y-auto">
+                <div className="space-y-4 max-h-[60vh] overflow-auto">
                   {cart.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center space-x-4">
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="w-16 h-16 object-cover rounded"
-                        />
-                        <div>
-                          <h4 className="font-semibold">{item.name}</h4>
-                          <p className="text-sm text-gray-600">${item.price.toFixed(2)} each</p>
-                        </div>
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                    >
+                      <div>
+                        <h4 className="font-medium">{item.name}</h4>
+                        <p className="text-sm text-gray-600">
+                          Quantity: {item.quantity}
+                        </p>
+                        <p className="text-blue-600 font-medium">
+                          ${(item.price * item.quantity).toFixed(2)}
+                        </p>
                       </div>
-                      
-                      <div className="flex items-center space-x-4">
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          >
-                            -
-                          </Button>
-                          <span className="w-8 text-center">{item.quantity}</span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            >
-                            +
-                          </Button>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeFromCart(item.id)}
-                        >
-                          <X className="w-4 h-4 text-gray-500" />
-                        </Button>
-                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeFromCart(item.id)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
                     </div>
                   ))}
                 </div>
-
                 <div className="border-t pt-4 mt-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="font-semibold">Total</span>
-                    <span className="text-xl font-bold">${totalPrice.toFixed(2)}</span>
+                  <div className="flex justify-between mb-4">
+                    <span className="font-semibold">Total:</span>
+                    <span className="font-bold text-blue-600">
+                      ${totalPrice.toFixed(2)}
+                    </span>
                   </div>
                   <Button
                     className="w-full"
                     onClick={handleCheckout}
                   >
-                    Proceed to Checkout
+                    Proceed to Payment
                   </Button>
                 </div>
               </>
