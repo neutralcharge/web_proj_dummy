@@ -59,20 +59,21 @@ export default function AboutUsPage() {
         },
         opacity: 0,
         scale: 0.8,
-        rotateX: 45,
-        z: -300,
+        rotateX: 20, // Reduced from 45
+        z: -100, // Reduced from -300
         duration: 1.5,
       })
 
-      // Hover animation setup
+      // Hover animation setup with reduced rotation
       card.addEventListener('mousemove', (e) => {
         const rect = (card as HTMLElement).getBoundingClientRect()
         const x = e.clientX - rect.left
         const y = e.clientY - rect.top
         const centerX = rect.width / 2
         const centerY = rect.height / 2
-        const rotateX = (y - centerY) / 10
-        const rotateY = (centerX - x) / 10
+        // Reduced rotation sensitivity from /10 to /25
+        const rotateX = (y - centerY) / 25
+        const rotateY = (centerX - x) / 25
 
         gsap.to(card, {
           rotateX: rotateX,
@@ -110,6 +111,7 @@ export default function AboutUsPage() {
     }
   }, [])
 
+  // Rest of the component remains the same...
   return (
     <div ref={containerRef} className="min-h-screen relative overflow-hidden perspective">
       {/* Morphing background */}
