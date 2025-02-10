@@ -124,17 +124,28 @@ export default function LabTestBooking() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setShowConfirmation(true)
+    if (step === 3) {  // Only show confirmation when submitting on step 3
+      setShowConfirmation(true)
+    }
   }
 
   const isStepValid = () => {
-    if (step === 1) {
-      return formData.name && formData.age && formData.bloodGroup && formData.sex && formData.mobile && formData.address
+    switch (step) {
+      case 1:
+        return formData.name && formData.age && formData.bloodGroup && formData.sex && formData.mobile && formData.address
+      case 2:
+        return formData.selectedTests.length > 0 && formData.date && formData.time && formData.alternativeTime
+      case 3:
+        return true // Health information is optional
+      default:
+        return false
     }
-    if (step === 2) {
-      return formData.selectedTests.length > 0 && formData.date && formData.time && formData.alternativeTime
+  }
+
+  const handleNext = () => {
+    if (isStepValid()) {
+      setStep(step + 1)
     }
-    return true
   }
 
   return (
@@ -363,7 +374,7 @@ export default function LabTestBooking() {
               </Button>
             )}
             {step < 3 ? (
-              <Button type="button" onClick={() => setStep(step + 1)} disabled={!isStepValid()}>
+              <Button type="button" onClick={handleNext} disabled={!isStepValid()}>
                 Next
               </Button>
             ) : (
@@ -390,4 +401,3 @@ export default function LabTestBooking() {
     </div>
   )
 }
-
