@@ -1,14 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { gsap } from "gsap"
-import { useEffect } from "react"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
@@ -76,7 +75,21 @@ export default function LabTestBooking() {
     selectedTests: [],
   })
 
+  const backgroundRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
+    // Background animation (floating cells)
+    gsap.fromTo(
+      backgroundRef.current,
+      { opacity: 0 },
+      {
+        opacity: 1,
+        duration: 2,
+        ease: "power2.inOut",
+      }
+    )
+
+    // Page title animation
     gsap.from(".page-title", {
       y: -50,
       opacity: 0,
@@ -84,6 +97,7 @@ export default function LabTestBooking() {
       ease: "power3.out",
     })
 
+    // Form step animation
     gsap.from(".form-step", {
       opacity: 0,
       x: 100,
@@ -94,6 +108,7 @@ export default function LabTestBooking() {
       },
     })
 
+    // Test card animation
     gsap.from(".test-card", {
       scale: 0.9,
       opacity: 0,
@@ -103,6 +118,15 @@ export default function LabTestBooking() {
         trigger: ".test-card",
         start: "top center",
       },
+    })
+
+    // Floating elements animation
+    gsap.to(".floating-element", {
+      y: 20,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut",
+      duration: 3,
     })
   }, [])
 
@@ -121,13 +145,13 @@ export default function LabTestBooking() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (step === 3) {  // Only show confirmation on final submit
+    if (step === 3) {
       setShowConfirmation(true)
     }
   }
 
   const handleNext = (e: React.MouseEvent) => {
-    e.preventDefault() // Prevent form submission
+    e.preventDefault()
     if (isStepValid()) {
       setStep(step + 1)
     }
@@ -140,23 +164,35 @@ export default function LabTestBooking() {
       case 2:
         return formData.selectedTests.length > 0 && formData.date && formData.time && formData.alternativeTime
       case 3:
-        return true // Health information is optional
+        return true
       default:
         return false
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
-      <h1 className="page-title text-4xl font-bold text-center mb-8 text-gray-800">Lab Test Booking</h1>
+    <div className="min-h-screen bg-gradient-to-b from-[#f0f4f8] to-[#e3e9f2] p-6 relative overflow-hidden">
+      {/* Animated Background */}
+      <div
+        ref={backgroundRef}
+        className="absolute inset-0 z-0 bg-[url('/medical-background.svg')] bg-cover bg-center opacity-20"
+      >
+        <div className="floating-element absolute w-20 h-20 bg-[#d1e9ff] rounded-full top-20 left-10"></div>
+        <div className="floating-element absolute w-16 h-16 bg-[#d1ffe5] rounded-full top-40 right-20"></div>
+        <div className="floating-element absolute w-24 h-24 bg-[#f0d1ff] rounded-full bottom-20 left-1/2"></div>
+      </div>
 
-      <div className="max-w-3xl mx-auto">
+      <h1 className="page-title text-4xl font-bold text-center mb-8 text-[#2c3e50] relative z-10">
+        Lab Test Booking
+      </h1>
+
+      <div className="max-w-3xl mx-auto relative z-10">
         <div className="mb-8 flex justify-center gap-4">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                step === i ? "bg-blue-500 text-white" : "bg-gray-200"
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                step === i ? "bg-[#3498db] text-white scale-110" : "bg-[#bdc3c7]"
               }`}
             >
               {i}
@@ -165,8 +201,9 @@ export default function LabTestBooking() {
         </div>
 
         <form onSubmit={handleSubmit} className="form-step space-y-8">
+          {/* Step 1: Personal Information */}
           {step === 1 && (
-            <Card>
+            <Card className="transform transition-all hover:scale-105">
               <CardHeader>
                 <CardTitle>Personal Information</CardTitle>
                 <CardDescription>Please provide your basic details for the lab test</CardDescription>
@@ -263,8 +300,9 @@ export default function LabTestBooking() {
             </Card>
           )}
 
+          {/* Step 2: Select Lab Tests */}
           {step === 2 && (
-            <Card>
+            <Card className="transform transition-all hover:scale-105">
               <CardHeader>
                 <CardTitle>Select Lab Tests</CardTitle>
                 <CardDescription>Choose the tests you want to book</CardDescription>
@@ -327,8 +365,9 @@ export default function LabTestBooking() {
             </Card>
           )}
 
+          {/* Step 3: Health Information */}
           {step === 3 && (
-            <Card>
+            <Card className="transform transition-all hover:scale-105">
               <CardHeader>
                 <CardTitle>Health Information</CardTitle>
                 <CardDescription>Please provide your health details to ensure accurate testing</CardDescription>
@@ -365,6 +404,7 @@ export default function LabTestBooking() {
             </Card>
           )}
 
+          {/* Navigation Buttons */}
           <div className="flex justify-between">
             {step > 1 && (
               <Button type="button" variant="outline" onClick={() => setStep(step - 1)}>
@@ -372,24 +412,18 @@ export default function LabTestBooking() {
               </Button>
             )}
             {step < 3 ? (
-              <Button 
-                type="button"
-                onClick={handleNext}
-                disabled={!isStepValid()}
-              >
+              <Button type="button" onClick={handleNext} disabled={!isStepValid()}>
                 Next
               </Button>
             ) : (
-              <Button 
-                type="submit"
-                disabled={!isStepValid()}
-              >
+              <Button type="submit" disabled={!isStepValid()}>
                 Confirm Booking
               </Button>
             )}
           </div>
         </form>
 
+        {/* Confirmation Dialog */}
         <AlertDialog open={showConfirmation} onOpenChange={setShowConfirmation}>
           <AlertDialogContent className="max-w-md">
             <AlertDialogHeader>
