@@ -1,14 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { gsap } from "gsap"
-import { useEffect } from "react"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
@@ -76,7 +75,37 @@ export default function LabTestBooking() {
     selectedTests: [],
   })
 
+  const backgroundRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
+    // Background animation (floating cells and DNA strands)
+    gsap.fromTo(
+      backgroundRef.current,
+      { opacity: 0 },
+      {
+        opacity: 1,
+        duration: 2,
+        ease: "power2.inOut",
+      }
+    )
+
+    // Floating elements animation
+    gsap.to(".floating-cell", {
+      y: 20,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut",
+      duration: 3,
+    })
+
+    gsap.to(".dna-strand", {
+      rotation: 360,
+      repeat: -1,
+      ease: "none",
+      duration: 20,
+    })
+
+    // Page title animation
     gsap.from(".page-title", {
       y: -50,
       opacity: 0,
@@ -84,6 +113,7 @@ export default function LabTestBooking() {
       ease: "power3.out",
     })
 
+    // Form step animation
     gsap.from(".form-step", {
       opacity: 0,
       x: 100,
@@ -94,6 +124,7 @@ export default function LabTestBooking() {
       },
     })
 
+    // Test card animation
     gsap.from(".test-card", {
       scale: 0.9,
       opacity: 0,
@@ -147,37 +178,51 @@ export default function LabTestBooking() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6 relative overflow-hidden">
-      {/* Moving Medical Texture Background */}
+    <div className="min-h-screen bg-gradient-to-b from-[#f0f4f8] to-[#e3e9f2] p-6 relative overflow-hidden">
+      {/* Medical-Themed Moving Background */}
       <div
-        className="absolute inset-0 z-0"
-        style={{
-          background: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='10' fill='%23e2e8f0' /><line x1='0' y1='50' x2='100' y2='50' stroke='%23cbd5e1' stroke-width='2' /><line x1='50' y1='0' x2='50' y2='100' stroke='%23cbd5e1' stroke-width='2' /></svg>")`,
-          opacity: 0.2,
-          animation: "moveBackground 20s linear infinite",
-        }}
-      ></div>
+        ref={backgroundRef}
+        className="absolute inset-0 z-0 overflow-hidden"
+      >
+        {/* Floating Cells */}
+        <div className="floating-cell absolute w-12 h-12 bg-[#d1e9ff] rounded-full top-20 left-10 opacity-50"></div>
+        <div className="floating-cell absolute w-10 h-10 bg-[#d1ffe5] rounded-full top-40 right-20 opacity-50"></div>
+        <div className="floating-cell absolute w-14 h-14 bg-[#f0d1ff] rounded-full bottom-20 left-1/2 opacity-50"></div>
 
-      <style jsx>{`
-        @keyframes moveBackground {
-          0% {
-            background-position: 0 0;
-          }
-          100% {
-            background-position: 100% 100%;
-          }
-        }
-      `}</style>
+        {/* DNA Strands */}
+        <div className="dna-strand absolute w-40 h-40 top-1/4 left-1/4 opacity-30">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M50 10 L30 30 L50 50 L70 30 L50 10 Z M50 50 L30 70 L50 90 L70 70 L50 50 Z"
+              stroke="#3498db"
+              strokeWidth="2"
+              fill="none"
+            />
+          </svg>
+        </div>
+        <div className="dna-strand absolute w-40 h-40 top-1/3 right-1/4 opacity-30">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M50 10 L30 30 L50 50 L70 30 L50 10 Z M50 50 L30 70 L50 90 L70 70 L50 50 Z"
+              stroke="#2ecc71"
+              strokeWidth="2"
+              fill="none"
+            />
+          </svg>
+        </div>
+      </div>
 
-      <h1 className="page-title text-4xl font-bold text-center mb-8 text-gray-800">Lab Test Booking</h1>
+      <h1 className="page-title text-4xl font-bold text-center mb-8 text-[#2c3e50] relative z-10">
+        Lab Test Booking
+      </h1>
 
       <div className="max-w-3xl mx-auto relative z-10">
         <div className="mb-8 flex justify-center gap-4">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                step === i ? "bg-blue-500 text-white" : "bg-gray-200"
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                step === i ? "bg-[#3498db] text-white scale-110" : "bg-[#bdc3c7]"
               }`}
             >
               {i}
@@ -186,8 +231,9 @@ export default function LabTestBooking() {
         </div>
 
         <form onSubmit={handleSubmit} className="form-step space-y-8">
+          {/* Step 1: Personal Information */}
           {step === 1 && (
-            <Card>
+            <Card className="transform transition-all hover:scale-105">
               <CardHeader>
                 <CardTitle>Personal Information</CardTitle>
                 <CardDescription>Please provide your basic details for the lab test</CardDescription>
@@ -284,8 +330,9 @@ export default function LabTestBooking() {
             </Card>
           )}
 
+          {/* Step 2: Select Lab Tests */}
           {step === 2 && (
-            <Card>
+            <Card className="transform transition-all hover:scale-105">
               <CardHeader>
                 <CardTitle>Select Lab Tests</CardTitle>
                 <CardDescription>Choose the tests you want to book</CardDescription>
@@ -348,8 +395,9 @@ export default function LabTestBooking() {
             </Card>
           )}
 
+          {/* Step 3: Health Information */}
           {step === 3 && (
-            <Card>
+            <Card className="transform transition-all hover:scale-105">
               <CardHeader>
                 <CardTitle>Health Information</CardTitle>
                 <CardDescription>Please provide your health details to ensure accurate testing</CardDescription>
@@ -386,6 +434,7 @@ export default function LabTestBooking() {
             </Card>
           )}
 
+          {/* Navigation Buttons */}
           <div className="flex justify-between">
             {step > 1 && (
               <Button type="button" variant="outline" onClick={() => setStep(step - 1)}>
@@ -404,6 +453,7 @@ export default function LabTestBooking() {
           </div>
         </form>
 
+        {/* Confirmation Dialog */}
         <AlertDialog open={showConfirmation} onOpenChange={setShowConfirmation}>
           <AlertDialogContent className="max-w-md">
             <AlertDialogHeader>
