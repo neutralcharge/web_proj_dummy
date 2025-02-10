@@ -239,7 +239,7 @@ export default function HomePage() {
                 ) : (
                   <>
                     <Button asChild className="px-8 py-4 text-lg rounded-full">
-                      <Link href="/LabTest">Book Your Labtest</Link>
+                      <Link href="/consultation">Book Your Labtest</Link>
                     </Button>
                     <Button asChild variant="outline" className="px-8 py-4 text-lg rounded-full">
                       <Link href="/appointment">Book an Appointment</Link>
