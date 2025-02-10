@@ -1,10 +1,17 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { FireExtinguisher } from "lucide-react"
 import { gsap } from "gsap"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Checkbox } from "@/components/ui/checkbox"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { 
+import { Calendar } from "@/components/ui/calendar"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { toast } from "@/components/ui/use-toast"
+import {
   ChevronRight,
   CheckCircle2,
   Syringe,
@@ -16,16 +23,7 @@ import {
   Thermometer,
   Activity,
 } from "lucide-react"
-
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Calendar } from "@/components/ui/calendar"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Toaster } from "@/components/ui/toaster"
-import { toast } from "@/components/ui/use-toast"
+import dynamic from "next/dynamic"
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -63,7 +61,7 @@ const labTests = {
   "Imaging Tests": ["X-Ray", "Ultrasound", "MRI Scan", "CT Scan"],
 }
 
-export default function LabTestBooking() {
+const LabTestBooking = () => {
   const [step, setStep] = useState(1)
   const [showOtherHealth, setShowOtherHealth] = useState(false)
   const [otherHealth, setOtherHealth] = useState("")
@@ -89,96 +87,106 @@ export default function LabTestBooking() {
   })
 
   useEffect(() => {
-  const icons = [
-    { icon: Syringe, color: "rgba(59, 130, 246, 0.1)" },
-    { icon: Pill, color: "rgba(99, 102, 241, 0.1)" },
-    { icon: Stethoscope, color: "rgba(139, 92, 246, 0.1)" },
-    { icon: HeartPulse, color: "rgba(236, 72, 153, 0.1)" },
-    { icon: Microscope, color: "rgba(14, 165, 233, 0.1)" },
-    { icon: FirstAidKit, color: "rgba(239, 68, 68, 0.1)" },
-    { icon: Thermometer, color: "rgba(34, 197, 94, 0.1)" },
-    { icon: Activity, color: "rgba(168, 85, 247, 0.1)" },
-  ]
+    if (typeof window !== "undefined") {
+      // Create floating medical icons background
+      const icons = [
+        { icon: Syringe, color: "rgba(59, 130, 246, 0.1)" },
+        { icon: Pill, color: "rgba(99, 102, 241, 0.1)" },
+        { icon: Stethoscope, color: "rgba(139, 92, 246, 0.1)" },
+        { icon: HeartPulse, color: "rgba(236, 72, 153, 0.1)" },
+        { icon: Microscope, color: "rgba(14, 165, 233, 0.1)" },
+        { icon: FirstAidKit, color: "rgba(239, 68, 68, 0.1)" },
+        { icon: Thermometer, color: "rgba(34, 197, 94, 0.1)" },
+        { icon: Activity, color: "rgba(168, 85, 247, 0.1)" },
+      ]
 
-  if (backgroundRef.current) {
-    icons.forEach((iconData, index) => {
-      const iconElement = document.createElement("div")
-      const IconComponent = iconData.icon
-      iconElement.innerHTML = `<svg class="w-12 h-12" viewBox="0 0 24 24">${IconComponent({}).toString()}</svg>`
-      iconElement.style.position = "absolute"
-      iconElement.style.color = iconData.color
-      iconElement.style.opacity = "0.5"
-      iconElement.style.left = `${Math.random() * 100}%`
-      iconElement.style.top = `${Math.random() * 100}%`
-      backgroundRef.current?.appendChild(iconElement)
+      if (backgroundRef.current) {
+        icons.forEach((iconData, index) => {
+          const iconElement = document.createElement("div")
+          iconElement.innerHTML = `<svg class="w-12 h-12" viewBox="0 0 24 24">${iconData.icon().toString()}</svg>`
+          iconElement.style.position = "absolute"
+          iconElement.style.color = iconData.color
+          iconElement.style.opacity = "0.5"
+          iconElement.style.left = `${Math.random() * 100}%`
+          iconElement.style.top = `${Math.random() * 100}%`
+          backgroundRef.current?.appendChild(iconElement)
 
-      gsap.to(iconElement, {
-        y: -50,
-        x: Math.sin(index) * 30,
-        duration: 2 + Math.random() * 2,
+          gsap.to(iconElement, {
+            y: -50,
+            x: Math.sin(index) * 30,
+            duration: 2 + Math.random() * 2,
+            repeat: -1,
+            yoyo: true,
+            ease: "power1.inOut",
+            delay: index * 0.2,
+          })
+
+          gsap.to(iconElement, {
+            rotate: Math.random() > 0.5 ? 360 : -360,
+            duration: 20 + Math.random() * 10,
+            repeat: -1,
+            ease: "none",
+          })
+        })
+      }
+
+      // Animate step indicators
+      gsap.to(".step-indicator", {
+        scale: 1.1,
+        duration: 0.5,
+        stagger: 0.1,
         repeat: -1,
         yoyo: true,
         ease: "power1.inOut",
-        delay: index * 0.2,
       })
 
-      gsap.to(iconElement, {
-        rotate: Math.random() > 0.5 ? 360 : -360,
-        duration: 20 + Math.random() * 10,
-        repeat: -1,
-        ease: "none",
+      // Initial form animation
+      gsap.from(".form-container", {
+        y: 100,
+        opacity: 0,
+        duration: 1,
+        ease: "power3.out",
       })
-    })
-  }
-
-    gsap.to(".step-indicator", {
-      scale: 1.1,
-      duration: 0.5,
-      stagger: 0.1,
-      repeat: -1,
-      yoyo: true,
-      ease: "power1.inOut",
-    })
-
-    gsap.from(".form-container", {
-      y: 100,
-      opacity: 0,
-      duration: 1,
-      ease: "power3.out",
-    })
+    }
   }, [])
 
   const animateNextStep = (nextStep: number) => {
-    gsap.to(`.form-step-${step}`, {
-      scale: 0.8,
-      opacity: 0,
-      duration: 0.5,
-      onComplete: () => {
-        setStep(nextStep)
-        gsap.fromTo(
-          `.form-step-${nextStep}`,
-          {
-            scale: 1.2,
-            opacity: 0,
-            rotateY: -10,
+    if (typeof window !== "undefined") {
+      requestAnimationFrame(() => {
+        // Enhanced step transition animation
+        gsap.to(`.form-step-${step}`, {
+          scale: 0.8,
+          opacity: 0,
+          duration: 0.5,
+          onComplete: () => {
+            setStep(nextStep)
+            gsap.fromTo(
+              `.form-step-${nextStep}`,
+              {
+                scale: 1.2,
+                opacity: 0,
+                rotateY: -10,
+              },
+              {
+                scale: 1,
+                opacity: 1,
+                rotateY: 0,
+                duration: 0.7,
+                ease: "power3.out",
+              },
+            )
           },
-          {
-            scale: 1,
-            opacity: 1,
-            rotateY: 0,
-            duration: 0.7,
-            ease: "power3.out",
-          },
-        )
-      },
-    })
+        })
 
-    gsap.to(`.step-indicator-${nextStep}`, {
-      backgroundColor: "#3b82f6",
-      scale: 1.2,
-      duration: 0.3,
-      ease: "power2.out",
-    })
+        // Animate step indicators
+        gsap.to(`.step-indicator-${nextStep}`, {
+          backgroundColor: "#3b82f6",
+          scale: 1.2,
+          duration: 0.3,
+          ease: "power2.out",
+        })
+      })
+    }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -186,37 +194,41 @@ export default function LabTestBooking() {
     if (step < 4) {
       animateNextStep(step + 1)
     } else {
-      if (successRef.current) {
-        gsap.to(".form-container", {
-          scale: 0.8,
-          opacity: 0,
-          duration: 0.5,
-          onComplete: () => {
-            successRef.current!.style.display = "flex"
-            gsap.fromTo(
-              successRef.current,
-              {
-                scale: 0.5,
-                opacity: 0,
-                y: 50,
-              },
-              {
-                scale: 1,
-                opacity: 1,
-                y: 0,
-                duration: 1,
-                ease: "elastic.out(1, 0.5)",
-              },
-            )
+      // Show success animation
+      if (successRef.current && typeof window !== "undefined") {
+        requestAnimationFrame(() => {
+          gsap.to(".form-container", {
+            scale: 0.8,
+            opacity: 0,
+            duration: 0.5,
+            onComplete: () => {
+              successRef.current!.style.display = "flex"
+              gsap.fromTo(
+                successRef.current,
+                {
+                  scale: 0.5,
+                  opacity: 0,
+                  y: 50,
+                },
+                {
+                  scale: 1,
+                  opacity: 1,
+                  y: 0,
+                  duration: 1,
+                  ease: "elastic.out(1, 0.5)",
+                },
+              )
 
-            gsap.to(".success-icon", {
-              scale: 1.2,
-              rotation: 360,
-              duration: 1,
-              stagger: 0.2,
-              ease: "power2.out",
-            })
-          },
+              // Animate success icons
+              gsap.to(".success-icon", {
+                scale: 1.2,
+                rotation: 360,
+                duration: 1,
+                stagger: 0.2,
+                ease: "power2.out",
+              })
+            },
+          })
         })
       }
 
@@ -234,9 +246,11 @@ export default function LabTestBooking() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6 relative overflow-hidden">
+      {/* Floating Background Elements */}
       <div ref={backgroundRef} className="absolute inset-0 pointer-events-none" />
 
       <div className="max-w-3xl mx-auto relative z-10">
+        {/* Step Indicators */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-4 animate-fade-in">Lab Test Booking</h1>
           <div className="flex justify-center gap-8 mb-6">
@@ -257,6 +271,7 @@ export default function LabTestBooking() {
           </div>
         </div>
 
+        {/* Form Container */}
         <div className="form-container">
           <form onSubmit={handleSubmit} className="space-y-6">
             {step === 1 && (
@@ -596,6 +611,7 @@ export default function LabTestBooking() {
           </form>
         </div>
 
+        {/* Success Message */}
         <div ref={successRef} className="hidden fixed inset-0 bg-black bg-opacity-50 justify-center items-center">
           <div className="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full mx-4 text-center space-y-6">
             <div className="flex justify-center gap-4">
@@ -622,8 +638,7 @@ export default function LabTestBooking() {
         </div>
       </div>
 
-      <Toaster />
-
+      {/* Add floating particles effect */}
       <style jsx>{`
         @keyframes float {
           0% { transform: translateY(0px); }
@@ -658,3 +673,6 @@ export default function LabTestBooking() {
     </div>
   )
 }
+
+export default dynamic(() => Promise.resolve(LabTestBooking), { ssr: false })
+
