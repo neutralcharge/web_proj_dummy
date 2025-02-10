@@ -2,16 +2,8 @@
 
 import { useState, useEffect, useRef } from "react"
 import { gsap } from "gsap"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Checkbox } from "@/components/ui/checkbox"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { Calendar } from "@/components/ui/calendar"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { toast } from "@/components/ui/use-toast"
-import {
+import { 
   ChevronRight,
   CheckCircle2,
   Syringe,
@@ -23,6 +15,16 @@ import {
   Thermometer,
   Activity,
 } from "lucide-react"
+
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Calendar } from "@/components/ui/calendar"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Toaster } from "@/components/ui/toaster"
+import { toast } from "@/components/ui/use-toast"
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -86,7 +88,6 @@ export default function LabTestBooking() {
   })
 
   useEffect(() => {
-    // Create floating medical icons background
     const icons = [
       { icon: Syringe, color: "rgba(59, 130, 246, 0.1)" },
       { icon: Pill, color: "rgba(99, 102, 241, 0.1)" },
@@ -128,7 +129,6 @@ export default function LabTestBooking() {
       })
     }
 
-    // Animate step indicators
     gsap.to(".step-indicator", {
       scale: 1.1,
       duration: 0.5,
@@ -138,7 +138,6 @@ export default function LabTestBooking() {
       ease: "power1.inOut",
     })
 
-    // Initial form animation
     gsap.from(".form-container", {
       y: 100,
       opacity: 0,
@@ -148,7 +147,6 @@ export default function LabTestBooking() {
   }, [])
 
   const animateNextStep = (nextStep: number) => {
-    // Enhanced step transition animation
     gsap.to(`.form-step-${step}`, {
       scale: 0.8,
       opacity: 0,
@@ -173,7 +171,6 @@ export default function LabTestBooking() {
       },
     })
 
-    // Animate step indicators
     gsap.to(`.step-indicator-${nextStep}`, {
       backgroundColor: "#3b82f6",
       scale: 1.2,
@@ -187,7 +184,6 @@ export default function LabTestBooking() {
     if (step < 4) {
       animateNextStep(step + 1)
     } else {
-      // Show success animation
       if (successRef.current) {
         gsap.to(".form-container", {
           scale: 0.8,
@@ -211,7 +207,6 @@ export default function LabTestBooking() {
               },
             )
 
-            // Animate success icons
             gsap.to(".success-icon", {
               scale: 1.2,
               rotation: 360,
@@ -237,11 +232,9 @@ export default function LabTestBooking() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6 relative overflow-hidden">
-      {/* Floating Background Elements */}
       <div ref={backgroundRef} className="absolute inset-0 pointer-events-none" />
 
       <div className="max-w-3xl mx-auto relative z-10">
-        {/* Step Indicators */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-4 animate-fade-in">Lab Test Booking</h1>
           <div className="flex justify-center gap-8 mb-6">
@@ -262,7 +255,6 @@ export default function LabTestBooking() {
           </div>
         </div>
 
-        {/* Form Container */}
         <div className="form-container">
           <form onSubmit={handleSubmit} className="space-y-6">
             {step === 1 && (
@@ -602,7 +594,6 @@ export default function LabTestBooking() {
           </form>
         </div>
 
-        {/* Success Message */}
         <div ref={successRef} className="hidden fixed inset-0 bg-black bg-opacity-50 justify-center items-center">
           <div className="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full mx-4 text-center space-y-6">
             <div className="flex justify-center gap-4">
@@ -629,7 +620,8 @@ export default function LabTestBooking() {
         </div>
       </div>
 
-      {/* Add floating particles effect */}
+      <Toaster />
+
       <style jsx>{`
         @keyframes float {
           0% { transform: translateY(0px); }
@@ -664,4 +656,3 @@ export default function LabTestBooking() {
     </div>
   )
 }
-
