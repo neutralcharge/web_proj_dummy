@@ -86,7 +86,6 @@ export default function LabTestBooking() {
   });
 
   useEffect(() => {
-    // Floating medical icons with parallax effect
     const icons = [
       { icon: Syringe, color: "rgba(59, 130, 246, 0.1)" },
       { icon: Pill, color: "rgba(99, 102, 241, 0.1)" },
@@ -101,7 +100,6 @@ export default function LabTestBooking() {
     if (backgroundRef.current) {
       icons.forEach((iconData, index) => {
         const iconElement = document.createElement("div");
-        iconElement.innerHTML = `<svg class="w-12 h-12" viewBox="0 0 24 24">${iconData.icon().toString()}</svg>`;
         iconElement.style.position = "absolute";
         iconElement.style.color = iconData.color;
         iconElement.style.opacity = "0.5";
@@ -109,6 +107,17 @@ export default function LabTestBooking() {
         iconElement.style.top = `${Math.random() * 100}%`;
         backgroundRef.current?.appendChild(iconElement);
 
+        // Render the icon using React's createElement
+        const IconComponent = iconData.icon;
+        const iconSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        iconSvg.setAttribute("class", "w-12 h-12");
+        iconSvg.setAttribute("viewBox", "0 0 24 24");
+        const iconPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        iconPath.setAttribute("d", IconComponent({}).props.d); // Extract the path data from the icon component
+        iconSvg.appendChild(iconPath);
+        iconElement.appendChild(iconSvg);
+
+        // GSAP animations
         gsap.to(iconElement, {
           y: -50,
           x: Math.sin(index) * 30,
@@ -348,42 +357,32 @@ export default function LabTestBooking() {
 
         {/* Success Message */}
         <div ref={successRef} className="hidden fixed inset-0 bg-black bg-opacity-50 justify-center items-center">
-          <div className="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full mx-4 text-center space-y-6">
-            <div className="flex justify-center gap-4">
-              <CheckCircle2 className="success-icon w-20 h-20 text-green-500" />
-              <HeartPulse className="success-icon w-20 h-20 text-pink-500" />
-            </div>
-            <h2 className="text-3xl font-bold text-gray-800">Booking Confirmed! 🎉</h2>
-            <p className="text-gray-600 text-lg">
-              Thank you for choosing our services. Our professional medical team will be at your doorstep at the
-              scheduled time.
+                    <div className="bg-white p-8 rounded-xl shadow-2xl max-w-md text-center">
+            <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Booking Confirmed!</h2>
+            <p className="text-gray-600 mb-6">
+              We're excited to serve you. Our medical team will be at your doorstep at the scheduled time.
             </p>
-            <p className="text-blue-500 font-medium">
-              We're committed to providing you with the best healthcare experience.
-            </p>
-            <div className="pt-4">
-              <Button
-                onClick={() => window.location.reload()}
-                className="transform hover:scale-105 transition-transform"
-              >
-                Book Another Test
-              </Button>
-            </div>
+            <Button
+              onClick={() => {
+                gsap.to(successRef.current, {
+                  scale: 0.8,
+                  opacity: 0,
+                  duration: 0.5,
+                  onComplete: () => {
+                    if (successRef.current) {
+                      successRef.current.style.display = "none";
+                    }
+                  },
+                });
+              }}
+              className="transform hover:scale-105 transition-transform"
+            >
+              Close
+            </Button>
           </div>
         </div>
       </div>
-
-      {/* Confetti CSS */}
-      <style jsx>{`
-        .confetti {
-          position: absolute;
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          bottom: 0;
-          z-index: 1000;
-        }
-      `}</style>
     </div>
   );
 }
