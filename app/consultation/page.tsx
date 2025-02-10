@@ -1,61 +1,64 @@
-"use client";
+"use client"
 
-import { useState, useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { HeartPulse, Syringe, Pill, Activity, DNA, Pulse, CheckCircle2, ChevronRight } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar } from "@/components/ui/calendar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "@/components/ui/use-toast";
+import { useState } from "react"
+import { gsap } from "gsap"
+import { useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Checkbox } from "@/components/ui/checkbox"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger)
 
 interface FormData {
-  name: string;
-  age: string;
-  bloodGroup: string;
-  sex: string;
-  mobile: string;
-  address: string;
-  landmark: string;
-  date: Date | undefined;
-  preferredTime: string;
-  alternativeTime: string;
-  existingHealth: string[];
-  currentMedications: string;
-  allergies: string;
-  selectedTests: string[];
-  otherHealthIssue: string;
+  name: string
+  age: string
+  bloodGroup: string
+  sex: string
+  mobile: string
+  address: string
+  landmark: string
+  date: string
+  time: string
+  alternativeTime: string
+  healthIssues: string
+  medications: string
+  allergies: string
+  selectedTests: string[]
 }
 
-const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-const timeSlots = ["09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM"];
+const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
 
 const labTests = {
   "Blood Tests": [
     "Complete Blood Count (CBC)",
     "Lipid Profile",
     "Blood Sugar (Glucose)",
-    "Thyroid Function Test",
-    "Liver Function Test",
+    "Thyroid Function",
+    "Liver Function",
+    "Kidney Function",
   ],
-  "Urine Tests": ["Routine Urine Analysis", "Microalbumin Test", "Urine Culture"],
-  "Cardiac Tests": ["Electrocardiogram (ECG)", "Cardiac Markers", "Cholesterol Test"],
-  "Imaging Tests": ["X-Ray", "Ultrasound", "MRI Scan", "CT Scan"],
-};
+  "Diabetes Tests": ["HbA1c", "Fasting Blood Sugar", "Post Prandial Blood Sugar", "Glucose Tolerance Test"],
+  "Urine Tests": ["Routine Urine Analysis", "Microalbumin", "Culture and Sensitivity"],
+  "Cardiac Tests": ["ECG", "Cardiac Markers", "Cholesterol Profile"],
+  "Imaging Tests": ["X-Ray", "Ultrasound", "CT Scan", "MRI"],
+}
 
 export default function LabTestBooking() {
-  const [step, setStep] = useState(1);
-  const [showOtherHealth, setShowOtherHealth] = useState(false);
-  const [otherHealth, setOtherHealth] = useState("");
-  const backgroundRef = useRef<HTMLDivElement>(null);
-  const successRef = useRef<HTMLDivElement>(null);
-
+  const [step, setStep] = useState(1)
+  const [showConfirmation, setShowConfirmation] = useState(false)
   const [formData, setFormData] = useState<FormData>({
     name: "",
     age: "",
@@ -64,256 +67,175 @@ export default function LabTestBooking() {
     mobile: "",
     address: "",
     landmark: "",
-    date: undefined,
-    preferredTime: "",
+    date: "",
+    time: "",
     alternativeTime: "",
-    existingHealth: [],
-    currentMedications: "",
+    healthIssues: "",
+    medications: "",
     allergies: "",
     selectedTests: [],
-    otherHealthIssue: "",
-  });
+  })
 
   useEffect(() => {
-    // Medical-themed floating elements
-    const medicalElements = [
-      { icon: HeartPulse, color: "rgba(239, 68, 68, 0.1)", size: "w-16 h-16" }, // Beating heart
-      { icon: Syringe, color: "rgba(59, 130, 246, 0.1)", size: "w-12 h-12" }, // Syringe
-      { icon: Pill, color: "rgba(99, 102, 241, 0.1)", size: "w-10 h-10" }, // Pills
-      { icon: Activity, color: "rgba(34, 197, 94, 0.1)", size: "w-14 h-14" }, // Activity pulse
-      { icon: DNA, color: "rgba(168, 85, 247, 0.1)", size: "w-20 h-20" }, // DNA strand
-      { icon: Pulse, color: "rgba(236, 72, 153, 0.1)", size: "w-18 h-18" }, // Pulse line
-    ];
-
-    if (backgroundRef.current) {
-      medicalElements.forEach((element, index) => {
-        const iconElement = document.createElement("div");
-        iconElement.style.position = "absolute";
-        iconElement.style.color = element.color;
-        iconElement.style.opacity = "0.7";
-        iconElement.style.left = `${Math.random() * 100}%`;
-        iconElement.style.top = `${Math.random() * 100}%`;
-        backgroundRef.current?.appendChild(iconElement);
-
-        // Render the icon using React's createElement
-        const IconComponent = element.icon;
-        const iconSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        iconSvg.setAttribute("class", `${element.size} animate-float`);
-        iconSvg.setAttribute("viewBox", "0 0 24 24");
-        const iconPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        iconPath.setAttribute("d", IconComponent({}).props.d); // Extract the path data from the icon component
-        iconSvg.appendChild(iconPath);
-        iconElement.appendChild(iconSvg);
-
-        // GSAP animations for floating and rotating
-        gsap.to(iconElement, {
-          y: -50,
-          x: Math.sin(index) * 50,
-          duration: 5 + Math.random() * 5,
-          repeat: -1,
-          yoyo: true,
-          ease: "power1.inOut",
-          delay: index * 0.5,
-        });
-
-        gsap.to(iconElement, {
-          rotate: Math.random() > 0.5 ? 360 : -360,
-          duration: 20 + Math.random() * 10,
-          repeat: -1,
-          ease: "none",
-        });
-      });
-
-      // Add a heart rate monitor beeping effect
-      const heartRateElement = document.createElement("div");
-      heartRateElement.style.position = "absolute";
-      heartRateElement.style.bottom = "10%";
-      heartRateElement.style.left = "50%";
-      heartRateElement.style.transform = "translateX(-50%)";
-      heartRateElement.style.width = "200px";
-      heartRateElement.style.height = "50px";
-      heartRateElement.style.backgroundColor = "rgba(239, 68, 68, 0.1)";
-      heartRateElement.style.borderRadius = "10px";
-      heartRateElement.style.overflow = "hidden";
-      backgroundRef.current?.appendChild(heartRateElement);
-
-      const heartRateLine = document.createElement("div");
-      heartRateLine.style.position = "absolute";
-      heartRateLine.style.bottom = "0";
-      heartRateLine.style.left = "0";
-      heartRateLine.style.width = "100%";
-      heartRateLine.style.height = "2px";
-      heartRateLine.style.backgroundColor = "rgba(239, 68, 68, 0.8)";
-      heartRateElement.appendChild(heartRateLine);
-
-      // GSAP animation for heart rate beeping
-      gsap.to(heartRateLine, {
-        scaleX: 0,
-        duration: 0.5,
-        repeat: -1,
-        yoyo: true,
-        ease: "power1.inOut",
-      });
-    }
-  }, []);
-
-  const animateNextStep = (nextStep: number) => {
-    gsap.to(`.form-step-${step}`, {
-      scale: 0.8,
+    gsap.from(".page-title", {
+      y: -50,
       opacity: 0,
-      rotationY: 180,
-      duration: 0.5,
-      onComplete: () => {
-        setStep(nextStep);
-        gsap.fromTo(
-          `.form-step-${nextStep}`,
-          {
-            scale: 1.2,
-            opacity: 0,
-            rotationY: -180,
-          },
-          {
-            scale: 1,
-            opacity: 1,
-            rotationY: 0,
-            duration: 0.7,
-            ease: "power3.out",
-          },
-        );
-      },
-    });
+      duration: 1,
+      ease: "power3.out",
+    })
 
-    gsap.to(`.step-indicator-${nextStep}`, {
-      backgroundColor: "#3b82f6",
-      scale: 1.2,
-      duration: 0.3,
-      ease: "power2.out",
-    });
-  };
+    gsap.from(".form-step", {
+      opacity: 0,
+      x: 100,
+      duration: 0.8,
+      scrollTrigger: {
+        trigger: ".form-step",
+        start: "top center",
+      },
+    })
+
+    gsap.from(".test-card", {
+      scale: 0.9,
+      opacity: 0,
+      duration: 0.5,
+      stagger: 0.1,
+      scrollTrigger: {
+        trigger: ".test-card",
+        start: "top center",
+      },
+    })
+  }, [])
+
+  const handleInputChange = (field: keyof FormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleTestSelection = (test: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      selectedTests: prev.selectedTests.includes(test)
+        ? prev.selectedTests.filter((t) => t !== test)
+        : [...prev.selectedTests, test],
+    }))
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (step < 4) {
-      animateNextStep(step + 1);
-    } else {
-      if (successRef.current) {
-        gsap.to(".form-container", {
-          scale: 0.8,
-          opacity: 0,
-          duration: 0.5,
-          onComplete: () => {
-            successRef.current!.style.display = "flex";
-            gsap.fromTo(
-              successRef.current,
-              {
-                scale: 0.5,
-                opacity: 0,
-                y: 50,
-              },
-              {
-                scale: 1,
-                opacity: 1,
-                y: 0,
-                duration: 1,
-                ease: "elastic.out(1, 0.5)",
-              },
-            );
-
-            // Confetti effect
-            for (let i = 0; i < 100; i++) {
-              const confetti = document.createElement("div");
-              confetti.className = "confetti";
-              confetti.style.left = `${Math.random() * 100}%`;
-              confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
-              successRef.current?.appendChild(confetti);
-
-              gsap.to(confetti, {
-                y: -1000,
-                x: Math.random() * 1000 - 500,
-                rotation: Math.random() * 360,
-                duration: 2 + Math.random() * 2,
-                ease: "power1.out",
-                onComplete: () => confetti.remove(),
-              });
-            }
-          },
-        });
-      }
-
-      toast({
-        title: "Booking Confirmed! 🎉",
-        description: "We're excited to serve you. Our medical team will be at your doorstep at the scheduled time.",
-        duration: 5000,
-      });
+    e.preventDefault()
+    if (step === 3) {
+      setShowConfirmation(true)
     }
-  };
+  }
 
-  const updateFormData = (field: keyof FormData, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+  const handleNext = (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (isStepValid()) {
+      setStep(step + 1)
+    }
+  }
+
+  const isStepValid = () => {
+    switch (step) {
+      case 1:
+        return formData.name && formData.age && formData.bloodGroup && formData.sex && formData.mobile && formData.address
+      case 2:
+        return formData.selectedTests.length > 0 && formData.date && formData.time && formData.alternativeTime
+      case 3:
+        return true
+      default:
+        return false
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6 relative overflow-hidden">
-      {/* Floating Medical Background Elements */}
-      <div ref={backgroundRef} className="absolute inset-0 pointer-events-none" />
+      {/* Moving Medical Texture Background */}
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          background: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='10' fill='%23e2e8f0' /><line x1='0' y1='50' x2='100' y2='50' stroke='%23cbd5e1' stroke-width='2' /><line x1='50' y1='0' x2='50' y2='100' stroke='%23cbd5e1' stroke-width='2' /></svg>")`,
+          opacity: 0.2,
+          animation: "moveBackground 20s linear infinite",
+        }}
+      ></div>
+
+      <style jsx>{`
+        @keyframes moveBackground {
+          0% {
+            background-position: 0 0;
+          }
+          100% {
+            background-position: 100% 100%;
+          }
+        }
+      `}</style>
+
+      <h1 className="page-title text-4xl font-bold text-center mb-8 text-gray-800">Lab Test Booking</h1>
 
       <div className="max-w-3xl mx-auto relative z-10">
-        {/* Step Indicators */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4 animate-fade-in">Lab Test Booking</h1>
-          <div className="flex justify-center gap-8 mb-6">
-            {[1, 2, 3, 4].map((num) => (
-              <div
-                key={num}
-                className={`step-indicator step-indicator-${num} w-12 h-12 rounded-full flex items-center justify-center 
-                  ${step >= num ? "bg-blue-500 text-white" : "bg-gray-200"}
-                  transform hover:scale-110 transition-transform cursor-pointer
-                  shadow-lg hover:shadow-xl`}
-                style={{
-                  transform: `perspective(1000px) rotateY(${(num - step) * 5}deg)`,
-                }}
-              >
-                <span className="text-lg font-semibold">{num}</span>
-              </div>
-            ))}
-          </div>
+        <div className="mb-8 flex justify-center gap-4">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                step === i ? "bg-blue-500 text-white" : "bg-gray-200"
+              }`}
+            >
+              {i}
+            </div>
+          ))}
         </div>
 
-        {/* Form Container */}
-        <div className="form-container">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Step 1: Personal Information */}
-            {step === 1 && (
-              <div className="form-step-1 bg-white p-6 rounded-lg shadow-lg space-y-4">
-                <h2 className="text-2xl font-semibold text-gray-800 mb-6">Personal Information</h2>
-                <div className="space-y-4">
-                  <div>
+        <form onSubmit={handleSubmit} className="form-step space-y-8">
+          {step === 1 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Personal Information</CardTitle>
+                <CardDescription>Please provide your basic details for the lab test</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
                     <Label htmlFor="name">Full Name</Label>
                     <Input
                       id="name"
                       value={formData.name}
-                      onChange={(e) => updateFormData("name", e.target.value)}
-                      placeholder="Enter your full name"
+                      onChange={(e) => handleInputChange("name", e.target.value)}
                       required
                     />
                   </div>
-                  <div>
+                  <div className="space-y-2">
                     <Label htmlFor="age">Age</Label>
                     <Input
                       id="age"
                       type="number"
                       value={formData.age}
-                      onChange={(e) => updateFormData("age", e.target.value)}
-                      placeholder="Enter your age"
+                      onChange={(e) => handleInputChange("age", e.target.value)}
                       required
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="sex">Sex</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="bloodGroup">Blood Group</Label>
+                    <Select
+                      value={formData.bloodGroup}
+                      onValueChange={(value) => handleInputChange("bloodGroup", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select blood group" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {bloodGroups.map((group) => (
+                          <SelectItem key={group} value={group}>
+                            {group}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Sex</Label>
                     <RadioGroup
-                      id="sex"
                       value={formData.sex}
-                      onValueChange={(value) => updateFormData("sex", value)}
+                      onValueChange={(value) => handleInputChange("sex", value)}
                       className="flex gap-4"
                     >
                       <div className="flex items-center space-x-2">
@@ -330,217 +252,171 @@ export default function LabTestBooking() {
                       </div>
                     </RadioGroup>
                   </div>
-                  <div>
-                    <Label htmlFor="bloodGroup">Blood Group</Label>
-                    <Select
-                      value={formData.bloodGroup}
-                      onValueChange={(value) => updateFormData("bloodGroup", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select blood group" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {bloodGroups.map((group) => (
-                          <SelectItem key={group} value={group}>
-                            {group}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
+                  <div className="space-y-2">
                     <Label htmlFor="mobile">Mobile Number</Label>
                     <Input
                       id="mobile"
+                      type="tel"
                       value={formData.mobile}
-                      onChange={(e) => updateFormData("mobile", e.target.value)}
-                      placeholder="Enter your mobile number"
+                      onChange={(e) => handleInputChange("mobile", e.target.value)}
                       required
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="landmark">Landmark</Label>
+                    <Input
+                      id="landmark"
+                      value={formData.landmark}
+                      onChange={(e) => handleInputChange("landmark", e.target.value)}
+                    />
+                  </div>
                 </div>
-              </div>
-            )}
-
-            {/* Step 2: Select Lab Tests */}
-            {step === 2 && (
-              <div className="form-step-2 bg-white p-6 rounded-lg shadow-lg">
-                <h2 className="text-2xl font-semibold text-gray-800 mb-6">Select Lab Tests</h2>
-                <div className="space-y-4">
-                  {Object.entries(labTests).map(([category, tests]) => (
-                    <div key={category}>
-                      <h3 className="text-lg font-semibold mb-2">{category}</h3>
-                      <div className="grid grid-cols-2 gap-4">
-                        {tests.map((test) => (
-                          <div key={test} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={test}
-                              checked={formData.selectedTests.includes(test)}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  updateFormData("selectedTests", [...formData.selectedTests, test]);
-                                } else {
-                                  updateFormData(
-                                    "selectedTests",
-                                    formData.selectedTests.filter((t) => t !== test),
-                                  );
-                                }
-                              }}
-                            />
-                            <Label htmlFor={test}>{test}</Label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+                <div className="space-y-2">
+                  <Label htmlFor="address">Address</Label>
+                  <Textarea
+                    id="address"
+                    value={formData.address}
+                    onChange={(e) => handleInputChange("address", e.target.value)}
+                    required
+                  />
                 </div>
-              </div>
-            )}
+              </CardContent>
+            </Card>
+          )}
 
-            {/* Step 3: Health Information */}
-            {step === 3 && (
-              <div className="form-step-3 bg-white p-6 rounded-lg shadow-lg space-y-4">
-                <h2 className="text-2xl font-semibold text-gray-800 mb-6">Health Information</h2>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="existingHealth">Existing Health Conditions</Label>
-                    <div className="grid grid-cols-2 gap-4">
-                      {["Diabetes", "Hypertension", "Asthma", "Heart Disease"].map((condition) => (
-                        <div key={condition} className="flex items-center space-x-2">
+          {step === 2 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Select Lab Tests</CardTitle>
+                <CardDescription>Choose the tests you want to book</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {Object.entries(labTests).map(([category, tests]) => (
+                  <div key={category} className="space-y-4">
+                    <h3 className="font-semibold text-lg">{category}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {tests.map((test) => (
+                        <div
+                          key={test}
+                          className="test-card flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                        >
                           <Checkbox
-                            id={condition}
-                            checked={formData.existingHealth.includes(condition)}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                updateFormData("existingHealth", [...formData.existingHealth, condition]);
-                              } else {
-                                updateFormData(
-                                  "existingHealth",
-                                  formData.existingHealth.filter((c) => c !== condition),
-                                );
-                              }
-                            }}
+                            id={test}
+                            checked={formData.selectedTests.includes(test)}
+                            onCheckedChange={() => handleTestSelection(test)}
                           />
-                          <Label htmlFor={condition}>{condition}</Label>
+                          <Label htmlFor={test}>{test}</Label>
                         </div>
                       ))}
                     </div>
                   </div>
-                  <div>
-                    <Label htmlFor="currentMedications">Current Medications</Label>
+                ))}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="date">Preferred Date</Label>
                     <Input
-                      id="currentMedications"
-                      value={formData.currentMedications}
-                      onChange={(e) => updateFormData("currentMedications", e.target.value)}
-                      placeholder="List your current medications"
+                      id="date"
+                      type="date"
+                      value={formData.date}
+                      onChange={(e) => handleInputChange("date", e.target.value)}
+                      min={new Date().toISOString().split("T")[0]}
+                      required
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="allergies">Allergies</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="time">Preferred Time</Label>
                     <Input
-                      id="allergies"
-                      value={formData.allergies}
-                      onChange={(e) => updateFormData("allergies", e.target.value)}
-                      placeholder="List any allergies"
+                      id="time"
+                      type="time"
+                      value={formData.time}
+                      onChange={(e) => handleInputChange("time", e.target.value)}
+                      required
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="otherHealthIssue">Other Health Issues</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="alternativeTime">Alternative Time</Label>
                     <Input
-                      id="otherHealthIssue"
-                      value={formData.otherHealthIssue}
-                      onChange={(e) => updateFormData("otherHealthIssue", e.target.value)}
-                      placeholder="Describe any other health issues"
+                      id="alternativeTime"
+                      type="time"
+                      value={formData.alternativeTime}
+                      onChange={(e) => handleInputChange("alternativeTime", e.target.value)}
+                      required
                     />
                   </div>
                 </div>
-              </div>
-            )}
+              </CardContent>
+            </Card>
+          )}
 
-            {/* Step 4: Review and Confirm */}
-            {step === 4 && (
-              <div className="form-step-4 bg-white p-6 rounded-lg shadow-lg">
-                <div className="text-center space-y-4">
-                  <div className="flex justify-center gap-4">
-                    <CheckCircle2 className="success-icon w-16 h-16 text-green-500" />
-                    <HeartPulse className="success-icon w-16 h-16 text-pink-500" />
-                  </div>
-                  <h2 className="text-2xl font-semibold text-gray-800">Almost There!</h2>
-                  <p className="text-gray-600">Please review your booking details before confirming</p>
+          {step === 3 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Health Information</CardTitle>
+                <CardDescription>Please provide your health details to ensure accurate testing</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="healthIssues">Existing Health Issues</Label>
+                  <Textarea
+                    id="healthIssues"
+                    placeholder="e.g., Diabetes, Hypertension"
+                    value={formData.healthIssues}
+                    onChange={(e) => handleInputChange("healthIssues", e.target.value)}
+                  />
                 </div>
-                <div className="mt-6 space-y-4">
-                  <div>
-                    <Label>Name:</Label>
-                    <p>{formData.name}</p>
-                  </div>
-                  <div>
-                    <Label>Age:</Label>
-                    <p>{formData.age}</p>
-                  </div>
-                  <div>
-                    <Label>Sex:</Label>
-                    <p>{formData.sex}</p>
-                  </div>
-                  <div>
-                    <Label>Blood Group:</Label>
-                    <p>{formData.bloodGroup}</p>
-                  </div>
-                  <div>
-                    <Label>Selected Tests:</Label>
-                    <p>{formData.selectedTests.join(", ")}</p>
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="medications">Current Medications</Label>
+                  <Textarea
+                    id="medications"
+                    placeholder="List any medications you're currently taking"
+                    value={formData.medications}
+                    onChange={(e) => handleInputChange("medications", e.target.value)}
+                  />
                 </div>
-              </div>
-            )}
+                <div className="space-y-2">
+                  <Label htmlFor="allergies">Allergies</Label>
+                  <Textarea
+                    id="allergies"
+                    placeholder="e.g., latex, antiseptics"
+                    value={formData.allergies}
+                    onChange={(e) => handleInputChange("allergies", e.target.value)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-            {/* Navigation Buttons */}
-            <div className="flex justify-end space-x-4">
-              {step > 1 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => animateNextStep(step - 1)}
-                  className="transform hover:scale-105 transition-transform"
-                >
-                  Back
-                </Button>
-              )}
-              <Button type="submit" className="transform hover:scale-105 transition-transform">
-                {step === 4 ? "Confirm Booking" : "Next"}
-                <ChevronRight className="ml-2 h-4 w-4" />
+          <div className="flex justify-between">
+            {step > 1 && (
+              <Button type="button" variant="outline" onClick={() => setStep(step - 1)}>
+                Previous
               </Button>
-            </div>
-          </form>
-        </div>
-
-        {/* Success Message */}
-        <div ref={successRef} className="hidden fixed inset-0 bg-black bg-opacity-50 justify-center items-center">
-          <div className="bg-white p-8 rounded-xl shadow-2xl max-w-md text-center">
-            <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Booking Confirmed!</h2>
-            <p className="text-gray-600 mb-6">
-              We're excited to serve you. Our medical team will be at your doorstep at the scheduled time.
-            </p>
-            <Button
-              onClick={() => {
-                gsap.to(successRef.current, {
-                  scale: 0.8,
-                  opacity: 0,
-                  duration: 0.5,
-                  onComplete: () => {
-                    if (successRef.current) {
-                      successRef.current.style.display = "none";
-                    }
-                  },
-                });
-              }}
-              className="transform hover:scale-105 transition-transform"
-            >
-              Close
-            </Button>
+            )}
+            {step < 3 ? (
+              <Button type="button" onClick={handleNext} disabled={!isStepValid()}>
+                Next
+              </Button>
+            ) : (
+              <Button type="submit" disabled={!isStepValid()}>
+                Confirm Booking
+              </Button>
+            )}
           </div>
-        </div>
+        </form>
+
+        <AlertDialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+          <AlertDialogContent className="max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Booking Confirmed!</AlertDialogTitle>
+              <AlertDialogDescription>
+                We will be on the way to your place at your given time. Our team will contact you shortly with further
+                details.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <Button onClick={() => setShowConfirmation(false)}>Close</Button>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
-  );
+  )
 }
