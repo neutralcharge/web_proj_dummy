@@ -88,46 +88,47 @@ export default function LabTestBooking() {
   })
 
   useEffect(() => {
-    const icons = [
-      { icon: Syringe, color: "rgba(59, 130, 246, 0.1)" },
-      { icon: Pill, color: "rgba(99, 102, 241, 0.1)" },
-      { icon: Stethoscope, color: "rgba(139, 92, 246, 0.1)" },
-      { icon: HeartPulse, color: "rgba(236, 72, 153, 0.1)" },
-      { icon: Microscope, color: "rgba(14, 165, 233, 0.1)" },
-      { icon: FirstAidKit, color: "rgba(239, 68, 68, 0.1)" },
-      { icon: Thermometer, color: "rgba(34, 197, 94, 0.1)" },
-      { icon: Activity, color: "rgba(168, 85, 247, 0.1)" },
-    ]
+  const icons = [
+    { icon: Syringe, color: "rgba(59, 130, 246, 0.1)" },
+    { icon: Pill, color: "rgba(99, 102, 241, 0.1)" },
+    { icon: Stethoscope, color: "rgba(139, 92, 246, 0.1)" },
+    { icon: HeartPulse, color: "rgba(236, 72, 153, 0.1)" },
+    { icon: Microscope, color: "rgba(14, 165, 233, 0.1)" },
+    { icon: FirstAidKit, color: "rgba(239, 68, 68, 0.1)" },
+    { icon: Thermometer, color: "rgba(34, 197, 94, 0.1)" },
+    { icon: Activity, color: "rgba(168, 85, 247, 0.1)" },
+  ]
 
-    if (backgroundRef.current) {
-      icons.forEach((iconData, index) => {
-        const iconElement = document.createElement("div")
-        iconElement.innerHTML = `<svg class="w-12 h-12" viewBox="0 0 24 24">${iconData.icon().toString()}</svg>`
-        iconElement.style.position = "absolute"
-        iconElement.style.color = iconData.color
-        iconElement.style.opacity = "0.5"
-        iconElement.style.left = `${Math.random() * 100}%`
-        iconElement.style.top = `${Math.random() * 100}%`
-        backgroundRef.current?.appendChild(iconElement)
+  if (backgroundRef.current) {
+    icons.forEach((iconData, index) => {
+      const iconElement = document.createElement("div")
+      const IconComponent = iconData.icon
+      iconElement.innerHTML = `<svg class="w-12 h-12" viewBox="0 0 24 24">${IconComponent({}).toString()}</svg>`
+      iconElement.style.position = "absolute"
+      iconElement.style.color = iconData.color
+      iconElement.style.opacity = "0.5"
+      iconElement.style.left = `${Math.random() * 100}%`
+      iconElement.style.top = `${Math.random() * 100}%`
+      backgroundRef.current?.appendChild(iconElement)
 
-        gsap.to(iconElement, {
-          y: -50,
-          x: Math.sin(index) * 30,
-          duration: 2 + Math.random() * 2,
-          repeat: -1,
-          yoyo: true,
-          ease: "power1.inOut",
-          delay: index * 0.2,
-        })
-
-        gsap.to(iconElement, {
-          rotate: Math.random() > 0.5 ? 360 : -360,
-          duration: 20 + Math.random() * 10,
-          repeat: -1,
-          ease: "none",
-        })
+      gsap.to(iconElement, {
+        y: -50,
+        x: Math.sin(index) * 30,
+        duration: 2 + Math.random() * 2,
+        repeat: -1,
+        yoyo: true,
+        ease: "power1.inOut",
+        delay: index * 0.2,
       })
-    }
+
+      gsap.to(iconElement, {
+        rotate: Math.random() > 0.5 ? 360 : -360,
+        duration: 20 + Math.random() * 10,
+        repeat: -1,
+        ease: "none",
+      })
+    })
+  }
 
     gsap.to(".step-indicator", {
       scale: 1.1,
