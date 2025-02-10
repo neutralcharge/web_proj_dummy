@@ -77,7 +77,6 @@ export default function LabTestBooking() {
   })
 
   useEffect(() => {
-    // Initial animation
     gsap.from(".page-title", {
       y: -50,
       opacity: 0,
@@ -85,7 +84,6 @@ export default function LabTestBooking() {
       ease: "power3.out",
     })
 
-    // Step animations
     gsap.from(".form-step", {
       opacity: 0,
       x: 100,
@@ -96,7 +94,6 @@ export default function LabTestBooking() {
       },
     })
 
-    // Card animations
     gsap.from(".test-card", {
       scale: 0.9,
       opacity: 0,
@@ -124,8 +121,15 @@ export default function LabTestBooking() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (step === 3) {  // Only show confirmation when submitting on step 3
+    if (step === 3) {  // Only show confirmation on final submit
       setShowConfirmation(true)
+    }
+  }
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.preventDefault() // Prevent form submission
+    if (isStepValid()) {
+      setStep(step + 1)
     }
   }
 
@@ -139,12 +143,6 @@ export default function LabTestBooking() {
         return true // Health information is optional
       default:
         return false
-    }
-  }
-
-  const handleNext = () => {
-    if (isStepValid()) {
-      setStep(step + 1)
     }
   }
 
@@ -374,11 +372,18 @@ export default function LabTestBooking() {
               </Button>
             )}
             {step < 3 ? (
-              <Button type="button" onClick={handleNext} disabled={!isStepValid()}>
+              <Button 
+                type="button"
+                onClick={handleNext}
+                disabled={!isStepValid()}
+              >
                 Next
               </Button>
             ) : (
-              <Button type="submit" disabled={!isStepValid()}>
+              <Button 
+                type="submit"
+                disabled={!isStepValid()}
+              >
                 Confirm Booking
               </Button>
             )}
