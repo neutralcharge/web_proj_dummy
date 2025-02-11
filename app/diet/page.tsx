@@ -1,12 +1,33 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import gsap from "gsap"
-import { Loader2 } from "lucide-react"
+import { useState } from "react"
+import { Bell, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
+
+interface Service {
+  title: string
+  description: string
+  icon: React.ReactNode
+  href: string
+}
+
+const services: Service[] = [
+  {
+    title: "Notifications",
+    description: "Stay updated with your fitness progress",
+    icon: <Bell className="w-6 h-6" />,
+    href: "/notifications"
+  },
+  {
+    title: "Diet Planner",
+    description: "Create your personalized diet plan",
+    icon: <ArrowRight className="w-6 h-6" />,
+    href: "/diet"
+  }
+]
 
 interface UserData {
   height: number
@@ -39,7 +60,7 @@ interface NutritionPlan {
   }
 }
 
-export default function DietPage() {
+export default function ServicesPage() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [userData, setUserData] = useState<UserData>({
@@ -53,43 +74,7 @@ export default function DietPage() {
     sugarLevel: 0,
   })
   const [nutritionPlan, setNutritionPlan] = useState<NutritionPlan | null>(null)
-  const formRef = useRef<HTMLDivElement>(null)
-
-  // Animation for step transitions
-  useEffect(() => {
-    if (formRef.current) {
-      gsap.fromTo(
-        formRef.current,
-        {
-          opacity: 0,
-          y: 20,
-        },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          ease: "power2.out",
-        }
-      )
-    }
-  }, [step])
-
-  // Animation for loading state
-  useEffect(() => {
-    if (loading) {
-      gsap.to(formRef.current, {
-        opacity: 0.7,
-        scale: 0.98,
-        duration: 0.3,
-      })
-    } else {
-      gsap.to(formRef.current, {
-        opacity: 1,
-        scale: 1,
-        duration: 0.3,
-      })
-    }
-  }, [loading])
+  const [showDietPlanner, setShowDietPlanner] = useState(false)
 
   const calculateNutrition = (data: UserData): NutritionPlan => {
     const bmr =
@@ -145,9 +130,54 @@ export default function DietPage() {
     setStep((prev) => prev + 1)
   }
 
+  if (!showDietPlanner) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-8">Our Services</h1>
+        <div className="grid md:grid-cols-2 gap-6">
+          {services.map((service, index) => (
+            <Card key={index} className="p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-4">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  {service.icon}
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold">{service.title}</h3>
+                  <p className="text-gray-600">{service.description}</p>
+                </div>
+              </div>
+              <Button 
+                className="mt-4 w-full"
+                onClick={() => {
+                  if (service.title === "Diet Planner") {
+                    setShowDietPlanner(true)
+                  }
+                }}
+              >
+                Access Service
+              </Button>
+            </Card>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
-      <div className="container mx-auto max-w-4xl py-8" ref={formRef}>
+      <div className="container mx-auto max-w-4xl py-8">
+        <Button 
+          variant="outline" 
+          className="mb-4"
+          onClick={() => {
+            setShowDietPlanner(false)
+            setStep(1)
+            setNutritionPlan(null)
+          }}
+        >
+          Back to Services
+        </Button>
+
         {step === 1 && (
           <Card className="p-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">Let's start your health journey</h2>
@@ -216,7 +246,7 @@ export default function DietPage() {
                 onClick={handleNext}
                 disabled={loading || !userData.height || !userData.weight || !userData.age || !userData.gender}
               >
-                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Next"}
+                Next
               </Button>
             </div>
           </Card>
@@ -252,7 +282,7 @@ export default function DietPage() {
                 />
               </div>
               <Button className="w-full" onClick={handleNext} disabled={loading || !userData.goalWeight}>
-                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Next"}
+                Next
               </Button>
             </div>
           </Card>
@@ -276,7 +306,7 @@ export default function DietPage() {
                 </p>
               </div>
               <Button className="w-full" onClick={handleNext} disabled={loading || !userData.sugarLevel}>
-                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Generate Diet Plan"}
+                Generate Diet Plan
               </Button>
             </div>
           </Card>
