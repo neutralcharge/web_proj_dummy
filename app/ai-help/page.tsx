@@ -151,7 +151,7 @@ export default function LabReportAnalyzer() {
           </Link>
 
           <Link
-            href="/pharmacy"
+            href="/Onlinepharmacy"
             className="animate-button relative group px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full font-semibold shadow-lg transition-all duration-300 hover:shadow-green-200/50 hover:shadow-xl"
           >
             <span className="relative z-10">Buy Medicine</span>
