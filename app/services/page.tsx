@@ -100,7 +100,6 @@ export default function About() {
       title: "AI-Powered Health Assistant",
       description: "Get instant answers to your health queries using our advanced AI.",
       icon: <Brain className="w-6 h-6" />,
-      href: "/ai-help",
     },
     {
       title: "AI-Powered Health Assistant",
@@ -120,7 +119,7 @@ export default function About() {
       icon: <Bell className="w-6 h-6" />,
     },
     {
-      title: <a href="/diet">Diet Planner</a>",
+      title: "Diet Planner",
       description: "Reach your dream body weight goal naturally.",
       icon: <Activity className="w-6 h-6" />,
       href: "/diet",
