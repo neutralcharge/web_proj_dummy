@@ -120,7 +120,7 @@ export default function About() {
       icon: <Bell className="w-6 h-6" />,
     },
     {
-      title: "Diet Planner",
+      title: <a href="/diet">Diet Planner</a>",
       description: "Reach your dream body weight goal naturally.",
       icon: <Activity className="w-6 h-6" />,
       href: "/diet",
