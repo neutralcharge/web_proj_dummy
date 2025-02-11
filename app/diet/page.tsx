@@ -2,17 +2,11 @@
 
 import { useEffect, useRef, useState } from "react"
 import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
-
-// Register GSAP plugins
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger)
-}
 
 interface UserData {
   height: number
@@ -59,138 +53,40 @@ export default function DietPage() {
     sugarLevel: 0,
   })
   const [nutritionPlan, setNutritionPlan] = useState<NutritionPlan | null>(null)
-
-  const containerRef = useRef<HTMLDivElement>(null)
-  const backgroundRef = useRef<HTMLDivElement>(null)
-  const dnaRef = useRef<HTMLDivElement>(null)
-  const moleculesRef = useRef<HTMLDivElement>(null)
   const formRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    // Create floating medical symbols background
-    const container = containerRef.current
-    if (!container) return
-
-    const createMedicalSymbol = () => {
-      const symbol = document.createElement("div")
-      symbol.className = "absolute text-blue-100/20 text-4xl select-none pointer-events-none"
-      symbol.style.left = `${Math.random() * 100}vw`
-      symbol.style.top = `${Math.random() * 100}vh`
-      symbol.innerHTML = ["⚕", "+", "🔬", "💊", "🧬"][Math.floor(Math.random() * 5)]
-      return symbol
-    }
-
-    // Add multiple medical symbols
-    const symbols = Array.from({ length: 20 }, createMedicalSymbol)
-    symbols.forEach((symbol) => container.appendChild(symbol))
-
-    // Animate medical symbols
-    symbols.forEach((symbol) => {
-      gsap.to(symbol, {
-        duration: "random(15,25)",
-        repeat: -1,
-        yoyo: true,
-        ease: "none",
-        x: "random(-100,100)",
-        y: "random(-100,100)",
-        rotation: 360,
-      })
-    })
-
-    // DNA Helix Animation
-    const dnaContainer = dnaRef.current
-    if (dnaContainer) {
-      const strands = 20
-      for (let i = 0; i < strands; i++) {
-        const strand = document.createElement("div")
-        strand.className = "absolute w-2 h-2 rounded-full bg-blue-200/20"
-        dnaContainer.appendChild(strand)
-
-        gsap.to(strand, {
-          y: Math.sin(i / 2) * 150,
-          x: i * 20,
-          rotation: i * 20,
-          scale: Math.sin(i / 4) + 1,
-          duration: 3,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-          delay: i * 0.1,
-        })
-      }
-    }
-
-    // Molecule Animation
-    const moleculesContainer = moleculesRef.current
-    if (moleculesContainer) {
-      const molecules = 15
-      for (let i = 0; i < molecules; i++) {
-        const molecule = document.createElement("div")
-        molecule.className = "absolute w-4 h-4 rounded-full bg-green-200/20"
-        moleculesContainer.appendChild(molecule)
-
-        gsap.to(molecule, {
-          x: "random(-100,100)",
-          y: "random(-100,100)",
-          duration: "random(5,10)",
-          repeat: -1,
-          ease: "none",
-          delay: i * 0.3,
-        })
-
-        gsap.to(molecule, {
-          scale: "random(0.5,1.5)",
-          duration: "random(2,4)",
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-        })
-      }
-    }
-
-    // Cleanup
-    return () => {
-      symbols.forEach((symbol) => symbol.remove())
-      gsap.killTweensOf("*")
-    }
-  }, [])
-
-  // Step transitions
+  // Animation for step transitions
   useEffect(() => {
     if (formRef.current) {
       gsap.fromTo(
         formRef.current,
         {
           opacity: 0,
-          scale: 0.9,
-          y: 50,
+          y: 20,
         },
         {
           opacity: 1,
-          scale: 1,
           y: 0,
-          duration: 0.8,
-          ease: "back.out(1.2)",
+          duration: 0.5,
+          ease: "power2.out",
         }
       )
     }
   }, [step])
 
-  // Loading animations
+  // Animation for loading state
   useEffect(() => {
     if (loading) {
-      gsap.to(".form-container", {
-        scale: 0.95,
-        opacity: 0.5,
-        duration: 0.5,
-        ease: "power2.inOut",
+      gsap.to(formRef.current, {
+        opacity: 0.7,
+        scale: 0.98,
+        duration: 0.3,
       })
     } else {
-      gsap.to(".form-container", {
-        scale: 1,
+      gsap.to(formRef.current, {
         opacity: 1,
-        duration: 0.5,
-        ease: "power2.out",
+        scale: 1,
+        duration: 0.3,
       })
     }
   }, [loading])
@@ -238,7 +134,7 @@ export default function DietPage() {
 
   const handleNext = async () => {
     setLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    await new Promise((resolve) => setTimeout(resolve, 1000))
 
     if (step === 3) {
       const plan = calculateNutrition(userData)
@@ -250,242 +146,194 @@ export default function DietPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 relative overflow-hidden" ref={containerRef}>
-      <div className="fixed inset-0 pointer-events-none">
-        <div ref={dnaRef} className="absolute inset-0" />
-        <div ref={moleculesRef} className="absolute inset-0" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.1),rgba(255,255,255,0))]" />
-      </div>
-
-      <div className="container mx-auto px-4 py-16 relative">
-        <div className="form-container" ref={formRef}>
-          {step === 1 && (
-            <Card className="max-w-lg mx-auto p-8 backdrop-blur-md bg-white/90 shadow-xl">
-              <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">Let's start your health journey</h2>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="height">Height (cm)</Label>
-                      <Input
-                        id="height"
-                        type="number"
-                        value={userData.height || ""}
-                        onChange={(e) => setUserData((prev) => ({ ...prev, height: Number(e.target.value) }))}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="weight">Weight (kg)</Label>
-                      <Input
-                        id="weight"
-                        type="number"
-                        value={userData.weight || ""}
-                        onChange={(e) => setUserData((prev) => ({ ...prev, weight: Number(e.target.value) }))}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="age">Age</Label>
-                      <Input
-                        id="age"
-                        type="number"
-                        value={userData.age || ""}
-                        onChange={(e) => setUserData((prev) => ({ ...prev, age: Number(e.target.value) }))}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="gender">Gender</Label>
-                      <select
-                        id="gender"
-                        className="w-full p-2 border rounded-md"
-                        value={userData.gender}
-                        onChange={(e) => setUserData((prev) => ({ ...prev, gender: e.target.value }))}
-                      >
-                        <option value="">Select gender</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="activity">Activity Level</Label>
-                    <select
-                      id="activity"
-                      className="w-full p-2 border rounded-md"
-                      value={userData.activityLevel}
-                      onChange={(e) => setUserData((prev) => ({ ...prev, activityLevel: e.target.value }))}
-                    >
-                      <option value="sedentary">Sedentary (little or no exercise)</option>
-                      <option value="light">Light (exercise 1-3 times/week)</option>
-                      <option value="moderate">Moderate (exercise 3-5 times/week)</option>
-                      <option value="active">Active (exercise 6-7 times/week)</option>
-                      <option value="veryActive">Very Active (hard exercise daily)</option>
-                    </select>
-                  </div>
-                  <Button
-                    className="w-full"
-                    onClick={handleNext}
-                    disabled={loading || !userData.height || !userData.weight || !userData.age || !userData.gender}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
+      <div className="container mx-auto max-w-4xl py-8" ref={formRef}>
+        {step === 1 && (
+          <Card className="p-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">Let's start your health journey</h2>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="height">Height (cm)</Label>
+                  <Input
+                    id="height"
+                    type="number"
+                    value={userData.height || ""}
+                    onChange={(e) => setUserData((prev) => ({ ...prev, height: Number(e.target.value) }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="weight">Weight (kg)</Label>
+                  <Input
+                    id="weight"
+                    type="number"
+                    value={userData.weight || ""}
+                    onChange={(e) => setUserData((prev) => ({ ...prev, weight: Number(e.target.value) }))}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="age">Age</Label>
+                  <Input
+                    id="age"
+                    type="number"
+                    value={userData.age || ""}
+                    onChange={(e) => setUserData((prev) => ({ ...prev, age: Number(e.target.value) }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="gender">Gender</Label>
+                  <select
+                    id="gender"
+                    className="w-full p-2 border rounded-md"
+                    value={userData.gender}
+                    onChange={(e) => setUserData((prev) => ({ ...prev, gender: e.target.value }))}
                   >
-                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Next"}
-                  </Button>
+                    <option value="">Select gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
                 </div>
               </div>
-            </Card>
-          )}
+              <div>
+                <Label htmlFor="activity">Activity Level</Label>
+                <select
+                  id="activity"
+                  className="w-full p-2 border rounded-md"
+                  value={userData.activityLevel}
+                  onChange={(e) => setUserData((prev) => ({ ...prev, activityLevel: e.target.value }))}
+                >
+                  <option value="sedentary">Sedentary (little or no exercise)</option>
+                  <option value="light">Light (exercise 1-3 times/week)</option>
+                  <option value="moderate">Moderate (exercise 3-5 times/week)</option>
+                  <option value="active">Active (exercise 6-7 times/week)</option>
+                  <option value="veryActive">Very Active (hard exercise daily)</option>
+                </select>
+              </div>
+              <Button
+                className="w-full"
+                onClick={handleNext}
+                disabled={loading || !userData.height || !userData.weight || !userData.age || !userData.gender}
+              >
+                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Next"}
+              </Button>
+            </div>
+          </Card>
+        )}
 
-          {step === 2 && (
-            <Card className="max-w-lg mx-auto p-8 backdrop-blur-md bg-white/90 shadow-xl">
-              <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">What's your goal?</h2>
-                <div className="space-y-6">
-                  <div className="flex gap-4">
-                    <Button
-                      variant={userData.goal === "lose" ? "default" : "outline"}
-                      className="flex-1"
-                      onClick={() => setUserData((prev) => ({ ...prev, goal: "lose" }))}
-                    >
-                      Lose Weight
-                    </Button>
-                    <Button
-                      variant={userData.goal === "gain" ? "default" : "outline"}
-                      className="flex-1"
-                      onClick={() => setUserData((prev) => ({ ...prev, goal: "gain" }))}
-                    >
-                      Gain Weight
-                    </Button>
-                  </div>
-                  <div>
-                    <Label htmlFor="goalWeight">Target Weight (kg)</Label>
-                    <Input
-                      id="goalWeight"
-                      type="number"
-                      value={userData.goalWeight || ""}
-                      onChange={(e) => setUserData((prev) => ({ ...prev, goalWeight: Number(e.target.value) }))}
-                    />
-                  </div>
-                  <Button className="w-full" onClick={handleNext} disabled={loading || !userData.goalWeight}>
-                    {loading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Preparing your diet chart...
-                      </>
-                    ) : (
-                      "Get My Diet Plan"
-                    )}
-                  </Button>
+        {step === 2 && (
+          <Card className="p-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">What's your goal?</h2>
+            <div className="space-y-6">
+              <div className="flex gap-4">
+                <Button
+                  variant={userData.goal === "lose" ? "default" : "outline"}
+                  className="flex-1"
+                  onClick={() => setUserData((prev) => ({ ...prev, goal: "lose" }))}
+                >
+                  Lose Weight
+                </Button>
+                <Button
+                  variant={userData.goal === "gain" ? "default" : "outline"}
+                  className="flex-1"
+                  onClick={() => setUserData((prev) => ({ ...prev, goal: "gain" }))}
+                >
+                  Gain Weight
+                </Button>
+              </div>
+              <div>
+                <Label htmlFor="goalWeight">Target Weight (kg)</Label>
+                <Input
+                  id="goalWeight"
+                  type="number"
+                  value={userData.goalWeight || ""}
+                  onChange={(e) => setUserData((prev) => ({ ...prev, goalWeight: Number(e.target.value) }))}
+                />
+              </div>
+              <Button className="w-full" onClick={handleNext} disabled={loading || !userData.goalWeight}>
+                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Next"}
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        {step === 3 && (
+          <Card className="p-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">One Last Step</h2>
+            <div className="space-y-6">
+              <div>
+                <Label htmlFor="sugarLevel">Blood Sugar Level (mg/dL)</Label>
+                <Input
+                  id="sugarLevel"
+                  type="number"
+                  placeholder="Enter your blood sugar level"
+                  value={userData.sugarLevel || ""}
+                  onChange={(e) => setUserData((prev) => ({ ...prev, sugarLevel: Number(e.target.value) }))}
+                />
+                <p className="text-sm text-gray-500 mt-2">
+                  Normal fasting blood sugar level is between 70-100 mg/dL
+                </p>
+              </div>
+              <Button className="w-full" onClick={handleNext} disabled={loading || !userData.sugarLevel}>
+                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Generate Diet Plan"}
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        {step === 4 && nutritionPlan && (
+          <Card className="p-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">Your Personalized Nutrition Plan</h2>
+            <div className="space-y-6">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h3 className="font-semibold mb-2">Daily Calories</h3>
+                <p className="text-3xl font-bold">{nutritionPlan.calories} kcal</p>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-green-50 p-4 rounded-lg text-center">
+                  <h4 className="font-medium">Protein</h4>
+                  <p className="text-xl font-bold">{nutritionPlan.protein}g</p>
+                </div>
+                <div className="bg-yellow-50 p-4 rounded-lg text-center">
+                  <h4 className="font-medium">Carbs</h4>
+                  <p className="text-xl font-bold">{nutritionPlan.carbs}g</p>
+                </div>
+                <div className="bg-red-50 p-4 rounded-lg text-center">
+                  <h4 className="font-medium">Fats</h4>
+                  <p className="text-xl font-bold">{nutritionPlan.fats}g</p>
                 </div>
               </div>
-            </Card>
-          )}
 
-          {step === 3 && (
-            <Card className="max-w-lg mx-auto p-8 backdrop-blur-md bg-white/90 shadow-xl">
-              <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">One Last Step</h2>
-                <div className="space-y-6">
-                  <div>
-                    <Label htmlFor="sugarLevel">Blood Sugar Level (mg/dL)</Label>
-                    <Input
-                      id="sugarLevel"
-                      type="number"
-                      placeholder="Enter your blood sugar level"
-                      value={userData.sugarLevel || ""}
-                      onChange={(e) => setUserData((prev) => ({ ...prev, sugarLevel: Number(e.target.value) }))}
-                    />
-  <p className="text-sm text-gray-500 mt-2">
-                      Normal fasting blood sugar level is between 70-100 mg/dL
-                    </p>
-                  </div>
-                  <Button className="w-full" onClick={handleNext} disabled={loading || !userData.sugarLevel}>
-                    {loading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Analyzing blood sugar levels...
-                      </>
-                    ) : (
-                      "Generate Diet Plan"
-                    )}
-                  </Button>
-                </div>
+              <div className="bg-purple-50 p-4 rounded-lg">
+                <h3 className="font-semibold mb-2">Sugar Limit</h3>
+                <p className="text-xl font-bold">{nutritionPlan.sugarLimit}g per day</p>
               </div>
-            </Card>
-          )}
 
-          {step === 4 && nutritionPlan && (
-            <Card className="max-w-4xl mx-auto p-8 backdrop-blur-md bg-white/90 shadow-xl">
-              <div className="results-container">
-                <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Your Personalized Nutrition Plan</h2>
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div className="space-y-6">
-                    <h3 className="text-xl font-semibold">Daily Macronutrients</h3>
-                    <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-inner">
-                      <div className="text-center mb-4">
-                        <div className="text-sm text-blue-600">Daily Calories</div>
-                        <div className="text-4xl font-bold text-blue-800">{nutritionPlan.calories}</div>
-                        <div className="text-sm text-blue-600">kcal</div>
-                      </div>
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="text-center p-3 bg-white/50 rounded-lg">
-                          <div className="text-sm text-green-600">Protein</div>
-                          <div className="text-xl font-bold text-green-800">{nutritionPlan.protein}g</div>
-                        </div>
-                        <div className="text-center p-3 bg-white/50 rounded-lg">
-                          <div className="text-sm text-yellow-600">Carbs</div>
-                          <div className="text-xl font-bold text-yellow-800">{nutritionPlan.carbs}g</div>
-                        </div>
-                        <div className="text-center p-3 bg-white/50 rounded-lg">
-                          <div className="text-sm text-red-600">Fats</div>
-                          <div className="text-xl font-bold text-red-800">{nutritionPlan.fats}g</div>
-                        </div>
-                      </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="bg-teal-50 p-4 rounded-lg">
+                  <h3 className="font-semibold mb-2">Vitamins</h3>
+                  {Object.entries(nutritionPlan.vitamins).map(([vitamin, amount]) => (
+                    <div key={vitamin} className="flex justify-between items-center py-1">
+                      <span>Vitamin {vitamin.toUpperCase()}</span>
+                      <span className="font-medium">{amount} mcg</span>
                     </div>
-
-                    <div className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl shadow-inner">
-                      <h4 className="text-lg font-semibold mb-3">Sugar Intake</h4>
-                      <div className="text-center">
-                        <div className="text-sm text-purple-600">Daily Sugar Limit</div>
-                        <div className="text-3xl font-bold text-purple-800">{nutritionPlan.sugarLimit}g</div>
-                        <p className="text-sm text-purple-600 mt-2">
-                          Based on your blood sugar level: {userData.sugarLevel} mg/dL
-                        </p>
-                      </div>
+                  ))}
+                </div>
+                <div className="bg-orange-50 p-4 rounded-lg">
+                  <h3 className="font-semibold mb-2">Minerals</h3>
+                  {Object.entries(nutritionPlan.minerals).map(([mineral, amount]) => (
+                    <div key={mineral} className="flex justify-between items-center py-1">
+                      <span className="capitalize">{mineral}</span>
+                      <span className="font-medium">{amount} mg</span>
                     </div>
-                  </div>
-
-                  <div className="space-y-6">
-                    <h3 className="text-xl font-semibold">Daily Micronutrients</h3>
-                    <div className="space-y-4">
-                      <div className="p-6 bg-gradient-to-br from-teal-50 to-green-50 rounded-xl shadow-inner">
-                        <h4 className="text-lg font-semibold mb-3">Vitamins</h4>
-                        <div className="grid gap-3">
-                          {Object.entries(nutritionPlan.vitamins).map(([vitamin, amount]) => (
-                            <div key={vitamin} className="flex justify-between items-center p-2 bg-white/50 rounded-lg">
-                              <span className="text-sm font-medium">Vitamin {vitamin.toUpperCase()}</span>
-                              <span className="font-bold">{amount} mcg</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="p-6 bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl shadow-inner">
-                        <h4 className="text-lg font-semibold mb-3">Minerals</h4>
-                        <div className="grid gap-3">
-                          {Object.entries(nutritionPlan.minerals).map(([mineral, amount]) => (
-                            <div key={mineral} className="flex justify-between items-center p-2 bg-white/50 rounded-lg">
-                              <span className="text-sm font-medium capitalize">{mineral}</span>
-                              <span className="font-bold">{amount} mg</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
-            </Card>
-          )}
-        </div>
+            </div>
+          </Card>
+        )}
       </div>
     </div>
   )
