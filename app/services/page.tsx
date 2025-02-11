@@ -119,13 +119,13 @@ export default function About() {
       title: "Book Labtest",
       description: "Book our varoius pathology services anytime, anywhere.",
       icon: <FileText className="w-6 h-6" />,
-      href: "/LabTest",
+      href: "/consultation",
     },
     {
       title: "Lab Report Analyser",
       description: "Securely Understand your Lab report with authentic information anytime, anywhere.",
       icon: <FileText className="w-6 h-6" />,
-      href: "/consultation",
+      href: "/labreport",
     },
     {
       title: "Online Pharmacy",
