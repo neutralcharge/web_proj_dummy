@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
-import { motion } from "framer-motion"
 
 // Register GSAP plugins
 if (typeof window !== "undefined") {
@@ -44,11 +43,6 @@ interface NutritionPlan {
     iron: number
     calcium: number
   }
-}
-
-const contentVariants = {
-  hidden: { opacity: 0, y: 50 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeInOut" } },
 }
 
 export default function DietPage() {
@@ -268,155 +262,149 @@ export default function DietPage() {
         <div className="form-container">
           {step === 1 && (
             <Card className="max-w-lg mx-auto p-8 backdrop-blur-md bg-white/90 shadow-xl">
-              <motion.div initial="hidden" animate="visible" variants={contentVariants}>
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">Let's start your health journey</h2>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="height">Height (cm)</Label>
-                      <Input
-                        id="height"
-                        type="number"
-                        value={userData.height || ""}
-                        onChange={(e) => setUserData((prev) => ({ ...prev, height: Number(e.target.value) }))}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="weight">Weight (kg)</Label>
-                      <Input
-                        id="weight"
-                        type="number"
-                        value={userData.weight || ""}
-                        onChange={(e) => setUserData((prev) => ({ ...prev, weight: Number(e.target.value) }))}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="age">Age</Label>
-                      <Input
-                        id="age"
-                        type="number"
-                        value={userData.age || ""}
-                        onChange={(e) => setUserData((prev) => ({ ...prev, age: Number(e.target.value) }))}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="gender">Gender</Label>
-                      <select
-                        id="gender"
-                        className="w-full p-2 border rounded-md"
-                        value={userData.gender}
-                        onChange={(e) => setUserData((prev) => ({ ...prev, gender: e.target.value }))}
-                      >
-                        <option value="">Select gender</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                      </select>
-                    </div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-6">Let's start your health journey</h2>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="height">Height (cm)</Label>
+                    <Input
+                      id="height"
+                      type="number"
+                      value={userData.height || ""}
+                      onChange={(e) => setUserData((prev) => ({ ...prev, height: Number(e.target.value) }))}
+                    />
                   </div>
                   <div>
-                    <Label htmlFor="activity">Activity Level</Label>
+                    <Label htmlFor="weight">Weight (kg)</Label>
+                    <Input
+                      id="weight"
+                      type="number"
+                      value={userData.weight || ""}
+                      onChange={(e) => setUserData((prev) => ({ ...prev, weight: Number(e.target.value) }))}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="age">Age</Label>
+                    <Input
+                      id="age"
+                      type="number"
+                      value={userData.age || ""}
+                      onChange={(e) => setUserData((prev) => ({ ...prev, age: Number(e.target.value) }))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="gender">Gender</Label>
                     <select
-                      id="activity"
+                      id="gender"
                       className="w-full p-2 border rounded-md"
-                      value={userData.activityLevel}
-                      onChange={(e) => setUserData((prev) => ({ ...prev, activityLevel: e.target.value }))}
+                      value={userData.gender}
+                      onChange={(e) => setUserData((prev) => ({ ...prev, gender: e.target.value }))}
                     >
-                      <option value="sedentary">Sedentary (little or no exercise)</option>
-                      <option value="light">Light (exercise 1-3 times/week)</option>
-                      <option value="moderate">Moderate (exercise 3-5 times/week)</option>
-                      <option value="active">Active (exercise 6-7 times/week)</option>
-                      <option value="veryActive">Very Active (hard exercise daily)</option>
+                      <option value="">Select gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
                     </select>
                   </div>
-                  <Button
-                    className="w-full"
-                    onClick={handleNext}
-                    disabled={loading || !userData.height || !userData.weight || !userData.age || !userData.gender}
-                  >
-                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Next"}
-                  </Button>
                 </div>
-              </motion.div>
+                <div>
+                  <Label htmlFor="activity">Activity Level</Label>
+                  <select
+                    id="activity"
+                    className="w-full p-2 border rounded-md"
+                    value={userData.activityLevel}
+                    onChange={(e) => setUserData((prev) => ({ ...prev, activityLevel: e.target.value }))}
+                  >
+                    <option value="sedentary">Sedentary (little or no exercise)</option>
+                    <option value="light">Light (exercise 1-3 times/week)</option>
+                    <option value="moderate">Moderate (exercise 3-5 times/week)</option>
+                    <option value="active">Active (exercise 6-7 times/week)</option>
+                    <option value="veryActive">Very Active (hard exercise daily)</option>
+                  </select>
+                </div>
+                <Button
+                  className="w-full"
+                  onClick={handleNext}
+                  disabled={loading || !userData.height || !userData.weight || !userData.age || !userData.gender}
+                >
+                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Next"}
+                </Button>
+              </div>
             </Card>
           )}
 
           {step === 2 && (
             <Card className="max-w-lg mx-auto p-8 backdrop-blur-md bg-white/90 shadow-xl">
-              <motion.div initial="hidden" animate="visible" variants={contentVariants}>
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">What's your goal?</h2>
-                <div className="space-y-6">
-                  <div className="flex gap-4">
-                    <Button
-                      variant={userData.goal === "lose" ? "default" : "outline"}
-                      className="flex-1"
-                      onClick={() => setUserData((prev) => ({ ...prev, goal: "lose" }))}
-                    >
-                      Lose Weight
-                    </Button>
-                    <Button
-                      variant={userData.goal === "gain" ? "default" : "outline"}
-                      className="flex-1"
-                      onClick={() => setUserData((prev) => ({ ...prev, goal: "gain" }))}
-                    >
-                      Gain Weight
-                    </Button>
-                  </div>
-                  <div>
-                    <Label htmlFor="goalWeight">Target Weight (kg)</Label>
-                    <Input
-                      id="goalWeight"
-                      type="number"
-                      value={userData.goalWeight || ""}
-                      onChange={(e) => setUserData((prev) => ({ ...prev, goalWeight: Number(e.target.value) }))}
-                    />
-                  </div>
-                  <Button className="w-full" onClick={handleNext} disabled={loading || !userData.goalWeight}>
-                    {loading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Preparing your diet chart...
-                      </>
-                    ) : (
-                      "Get My Diet Plan"
-                    )}
+              <h2 className="text-2xl font-bold text-gray-800 mb-6">What's your goal?</h2>
+              <div className="space-y-6">
+                <div className="flex gap-4">
+                  <Button
+                    variant={userData.goal === "lose" ? "default" : "outline"}
+                    className="flex-1"
+                    onClick={() => setUserData((prev) => ({ ...prev, goal: "lose" }))}
+                  >
+                    Lose Weight
+                  </Button>
+                  <Button
+                    variant={userData.goal === "gain" ? "default" : "outline"}
+                    className="flex-1"
+                    onClick={() => setUserData((prev) => ({ ...prev, goal: "gain" }))}
+                  >
+                    Gain Weight
                   </Button>
                 </div>
-              </motion.div>
+                <div>
+                  <Label htmlFor="goalWeight">Target Weight (kg)</Label>
+                  <Input
+                    id="goalWeight"
+                    type="number"
+                    value={userData.goalWeight || ""}
+                    onChange={(e) => setUserData((prev) => ({ ...prev, goalWeight: Number(e.target.value) }))}
+                  />
+                </div>
+                <Button className="w-full" onClick={handleNext} disabled={loading || !userData.goalWeight}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Preparing your diet chart...
+                    </>
+                  ) : (
+                    "Get My Diet Plan"
+                  )}
+                </Button>
+              </div>
             </Card>
           )}
 
           {step === 3 && (
             <Card className="max-w-lg mx-auto p-8 backdrop-blur-md bg-white/90 shadow-xl">
-              <motion.div initial="hidden" animate="visible" variants={contentVariants}>
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">One Last Step</h2>
-                <div className="space-y-6">
-                  <div>
-                    <Label htmlFor="sugarLevel">Blood Sugar Level (mg/dL)</Label>
-                    <Input
-                      id="sugarLevel"
-                      type="number"
-                      placeholder="Enter your blood sugar level"
-                      value={userData.sugarLevel || ""}
-                      onChange={(e) => setUserData((prev) => ({ ...prev, sugarLevel: Number(e.target.value) }))}
-                    />
-                    <p className="text-sm text-gray-500 mt-2">
-                      Normal fasting blood sugar level is between 70-100 mg/dL
-                    </p>
-                  </div>
-                  <Button className="w-full" onClick={handleNext} disabled={loading || !userData.sugarLevel}>
-                    {loading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Analyzing blood sugar levels...
-                      </>
-                    ) : (
-                      "Generate Diet Plan"
-                    )}
-                  </Button>
+              <h2 className="text-2xl font-bold text-gray-800 mb-6">One Last Step</h2>
+              <div className="space-y-6">
+                <div>
+                  <Label htmlFor="sugarLevel">Blood Sugar Level (mg/dL)</Label>
+                  <Input
+                    id="sugarLevel"
+                    type="number"
+                    placeholder="Enter your blood sugar level"
+                    value={userData.sugarLevel || ""}
+                    onChange={(e) => setUserData((prev) => ({ ...prev, sugarLevel: Number(e.target.value) }))}
+                  />
+                  <p className="text-sm text-gray-500 mt-2">
+                    Normal fasting blood sugar level is between 70-100 mg/dL
+                  </p>
                 </div>
-              </motion.div>
+                <Button className="w-full" onClick={handleNext} disabled={loading || !userData.sugarLevel}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Analyzing blood sugar levels...
+                    </>
+                  ) : (
+                    "Generate Diet Plan"
+                  )}
+                </Button>
+              </div>
             </Card>
           )}
 
