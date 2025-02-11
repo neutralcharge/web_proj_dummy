@@ -99,6 +99,7 @@ export default function About() {
       title: "Appointment Booking",
       description: "Easily schedule appointments with your preferred doctors.",
       icon: <Calendar className="w-6 h-6" />,
+      href="/appointment"
     },
     {
       title: "AI-Powered Health Assistant",
