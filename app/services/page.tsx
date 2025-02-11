@@ -99,17 +99,19 @@ export default function About() {
       title: "Appointment Booking",
       description: "Easily schedule appointments with your preferred doctors.",
       icon: <Calendar className="w-6 h-6" />,
-      href="/appointment"
+      href: "/appointment",
     },
     {
       title: "AI-Powered Health Assistant",
       description: "Get instant answers to your health queries using our advanced AI.",
       icon: <Brain className="w-6 h-6" />,
+      href: "/ai-help",
     },
     {
-      title: "Electronic Health Records",
-      description: "Securely store and access your medical history anytime, anywhere.",
+      title: "Lab Report Analyser",
+      description: "Securely Understand your Lab report with authentic information anytime, anywhere.",
       icon: <FileText className="w-6 h-6" />,
+      href: "/consultation",
     },
     {
       title: "Medication Reminders",
@@ -117,9 +119,10 @@ export default function About() {
       icon: <Bell className="w-6 h-6" />,
     },
     {
-      title: "Health Tracking",
-      description: "Monitor your vital signs and health metrics with our user-friendly tools.",
+      title: "Diet Planner",
+      description: "Reach your dream body weight goal naturally.",
       icon: <Activity className="w-6 h-6" />,
+      href: "/diet",
     },
   ]
 
