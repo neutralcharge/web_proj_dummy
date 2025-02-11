@@ -95,12 +95,13 @@ export default function About() {
       description: "Connect with healthcare professionals from the comfort of your home.",
       icon: <Video className="w-6 h-6" />,
     },
-    {
-      title: "Appointment Booking",
-      description: "Easily schedule appointments with your preferred doctors.",
-      icon: <Calendar className="w-6 h-6" />,
-      href: "/appointment",
-    },
+   <Link href="/appointment">
+  <div className="card cursor-pointer">
+    <Calendar className="w-6 h-6" />
+    <h3 className="font-bold">Appointment Booking</h3>
+    <p>Easily schedule appointments with your preferred doctors.</p>
+  </div>
+</Link>
     {
       title: "AI-Powered Health Assistant",
       description: "Get instant answers to your health queries using our advanced AI.",
