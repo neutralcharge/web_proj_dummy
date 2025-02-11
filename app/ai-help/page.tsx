@@ -162,12 +162,7 @@ export default function LabReportAnalyzer() {
         {/* Iframe Container */}
         <div className="max-w-5xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6">
           <div className="aspect-video">
-            <iframe
-              src="https://app.dante-ai.com/embed/?kb_id=3a286c00-ac41-4a29-86f7-b94c8c5e4361&token=f23d8f79-b62a-4ab6-93a0-0290b3c5e58a&modeltype=gpt-4-omnimodel-mini&tabs=false"
-              allow="clipboard-write; clipboard-read; *;microphone *"
-              className="w-full h-[500px] rounded-lg"
-              frameBorder="0"
-            />
+            <iframe src="https://app.dante-ai.com/embed/?kb_id=f915a2a9-d3d4-411a-a165-af28dc7b22ba&token=84bee53a-0a63-454b-b18d-0de7705f161d&modeltype=gpt-4-omnimodel-mini&tabs=false" allow="clipboard-write; clipboard-read; *;microphone *" width="100%" height="500" frameborder="0"></iframe>
           </div>
         </div>
       </div>
