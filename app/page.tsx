@@ -248,7 +248,7 @@ export default function HomePage() {
                       <Link href="/ai-help">Chat with AI</Link>
                     </Button>
                     <Button asChild variant="outline" className="px-8 py-4 text-lg rounded-full">
-                      <Link href="/ai-help">Lab Report Analyser</Link>
+                      <Link href="/labreport">Lab Report Analyser</Link>
                     </Button>
                   </>
                 )
