@@ -138,7 +138,7 @@ export default function LabReportAnalyzer() {
 
       {/* Main content */}
       <div ref={containerRef} className="relative z-10 container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold text-gray-800 text-center mb-8">Lab Report Analyzer</h1>
+        <h1 className="text-4xl font-bold text-gray-800 text-center mb-8">Doctor AI is here..</h1>
 
         {/* Action Buttons */}
         <div className="flex justify-center gap-6 mb-8">
