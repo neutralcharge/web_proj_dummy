@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Video, Calendar, Brain, FileText, Bell, Activity } from "lucide-react"
 import gsap from "gsap"
+import link from "next/link"
 
 interface ServiceCardProps {
   title: string
