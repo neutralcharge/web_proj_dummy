@@ -116,16 +116,22 @@ export default function About() {
       href: "/ai-help",
     },
     {
+      title: "Book Labtest",
+      description: "Book our varoius pathology services anytime, anywhere.",
+      icon: <FileText className="w-6 h-6" />,
+      href: "/consultation",
+    },
+    {
       title: "Lab Report Analyser",
       description: "Securely Understand your Lab report with authentic information anytime, anywhere.",
       icon: <FileText className="w-6 h-6" />,
       href: "/consultation",
     },
     {
-      title: "Medication Reminders",
-      description: "Never miss a dose with our smart medication reminder system.",
+      title: "Online Pharmacy",
+      description: "Get your medicine delivered at your doorsteps instantly",
       icon: <Bell className="w-6 h-6" />,
-      href: "/reminders",
+      href: "/Onlinepharmacy",
     },
     {
       title: "Diet Planner",
