@@ -90,11 +90,11 @@ export default function About() {
   }, [])
 
   const services = [
-    {
-      title: "Online Consultations",
-      description: "Connect with healthcare professionals from the comfort of your home.",
-      icon: <Video className="w-6 h-6" />,
-    },
+    // {
+    //   title: "Online Consultations",
+    //   description: "Connect with healthcare professionals from the comfort of your home.",
+    //   icon: <Video className="w-6 h-6" />,
+    // },
    <Link href="/appointment">
   <div className="card cursor-pointer">
     <Calendar className="w-6 h-6" />
