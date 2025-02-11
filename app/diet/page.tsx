@@ -84,27 +84,20 @@ export default function DietPage() {
     const symbols = Array.from({ length: 20 }, createMedicalSymbol)
     symbols.forEach((symbol) => container.appendChild(symbol))
 
-    // Animate medical symbols with more complex paths
+    // Animate medical symbols
     symbols.forEach((symbol) => {
       gsap.to(symbol, {
-        duration: 15 + Math.random() * 10,
+        duration: "random(15,25)",
         repeat: -1,
         yoyo: true,
         ease: "none",
-        motionPath: {
-          path: [
-            { x: Math.random() * 200 - 100, y: Math.random() * 200 - 100 },
-            { x: Math.random() * 200 - 100, y: Math.random() * 200 - 100 },
-            { x: Math.random() * 200 - 100, y: Math.random() * 200 - 100 },
-            { x: Math.random() * 200 - 100, y: Math.random() * 200 - 100 },
-          ],
-          curviness: 2,
-        },
+        x: "random(-100,100)",
+        y: "random(-100,100)",
         rotation: 360,
       })
     })
 
-    // DNA Helix Animation with enhanced complexity
+    // DNA Helix Animation
     const dnaContainer = dnaRef.current
     if (dnaContainer) {
       const strands = 20
@@ -127,7 +120,7 @@ export default function DietPage() {
       }
     }
 
-    // Enhanced Molecule Animation
+    // Molecule Animation
     const moleculesContainer = moleculesRef.current
     if (moleculesContainer) {
       const molecules = 15
@@ -137,24 +130,17 @@ export default function DietPage() {
         moleculesContainer.appendChild(molecule)
 
         gsap.to(molecule, {
-          motionPath: {
-            path: [
-              { x: Math.random() * 200 - 100, y: Math.random() * 200 - 100 },
-              { x: Math.random() * 200 - 100, y: Math.random() * 200 - 100 },
-              { x: Math.random() * 200 - 100, y: Math.random() * 200 - 100 },
-            ],
-            curviness: 1.5,
-            autoRotate: true,
-          },
-          duration: "random(5, 10)",
+          x: "random(-100,100)",
+          y: "random(-100,100)",
+          duration: "random(5,10)",
           repeat: -1,
           ease: "none",
           delay: i * 0.3,
         })
 
         gsap.to(molecule, {
-          scale: "random(0.5, 1.5)",
-          duration: "random(2, 4)",
+          scale: "random(0.5,1.5)",
+          duration: "random(2,4)",
           repeat: -1,
           yoyo: true,
           ease: "sine.inOut",
@@ -169,8 +155,8 @@ export default function DietPage() {
     }
   }, [])
 
+  // Step transitions
   useEffect(() => {
-    // Enhanced step transitions
     if (formRef.current) {
       gsap.fromTo(
         formRef.current,
@@ -185,19 +171,17 @@ export default function DietPage() {
           y: 0,
           duration: 0.8,
           ease: "back.out(1.2)",
-          clearProps: "all",
         }
       )
     }
   }, [step])
 
+  // Loading animations
   useEffect(() => {
-    // Loading state animations
     if (loading) {
       gsap.to(".form-container", {
         scale: 0.95,
         opacity: 0.5,
-        filter: "blur(3px)",
         duration: 0.5,
         ease: "power2.inOut",
       })
@@ -205,43 +189,11 @@ export default function DietPage() {
       gsap.to(".form-container", {
         scale: 1,
         opacity: 1,
-        filter: "blur(0px)",
         duration: 0.5,
         ease: "power2.out",
       })
     }
   }, [loading])
-
-  // Results animations
-  useEffect(() => {
-    if (step === 4 && nutritionPlan) {
-      // Animate in each section of the results
-      gsap.from(".results-container > *", {
-        opacity: 0,
-        y: 30,
-        duration: 0.8,
-        stagger: 0.2,
-        ease: "back.out(1.2)",
-      })
-
-      // Animate numbers counting up
-      gsap.from(".results-container .text-4xl, .results-container .text-3xl, .results-container .text-xl", {
-        textContent: 0,
-        duration: 2,
-        ease: "power1.out",
-        snap: { textContent: 1 },
-        stagger: 0.1,
-      })
-
-      // Animate progress bars or charts if any
-      gsap.from(".results-container .bg-white/50", {
-        width: 0,
-        duration: 1,
-        ease: "power2.out",
-        stagger: 0.1,
-      })
-    }
-  }, [step, nutritionPlan])
 
   const calculateNutrition = (data: UserData): NutritionPlan => {
     const bmr =
@@ -261,10 +213,7 @@ export default function DietPage() {
     const goalCalories = data.goal === "lose" ? tdee - 500 : tdee + 500
 
     const baseSugarLimit = 25
-    const sugarLimit =
-      data.sugarLevel > 100
-        ? baseSugarLimit * 0.7
-        : baseSugarLimit
+    const sugarLimit = data.sugarLevel > 100 ? baseSugarLimit * 0.7 : baseSugarLimit
 
     return {
       calories: Math.round(goalCalories),
@@ -289,13 +238,6 @@ export default function DietPage() {
 
   const handleNext = async () => {
     setLoading(true)
-
-    gsap.to(".loading-overlay", {
-      opacity: 1,
-      duration: 0.5,
-      ease: "power2.inOut",
-    })
-
     await new Promise((resolve) => setTimeout(resolve, 1500))
 
     if (step === 3) {
@@ -305,32 +247,14 @@ export default function DietPage() {
 
     setLoading(false)
     setStep((prev) => prev + 1)
-
-    gsap.to(".loading-overlay", {
-      opacity: 0,
-      duration: 0.5,
-      ease: "power2.inOut",
-    })
   }
 
   return (
-    <div
-      className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 relative overflow-hidden"
-      ref={containerRef}
-    >
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 relative overflow-hidden" ref={containerRef}>
       <div className="fixed inset-0 pointer-events-none">
         <div ref={dnaRef} className="absolute inset-0" />
         <div ref={moleculesRef} className="absolute inset-0" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.1),rgba(255,255,255,0))]" />
-      </div>
-
-      <div className="loading-overlay fixed inset-0 bg-white/80 opacity-0 pointer-events-none z-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-blue-500 mx-auto mb-4" />
-          <p className="text-xl font-medium text-blue-800">
-            {step === 3 ? "Preparing your personalized diet chart..." : "Processing..."}
-          </p>
-        </div>
       </div>
 
       <div className="container mx-auto px-4 py-16 relative">
@@ -470,7 +394,7 @@ export default function DietPage() {
                       value={userData.sugarLevel || ""}
                       onChange={(e) => setUserData((prev) => ({ ...prev, sugarLevel: Number(e.target.value) }))}
                     />
-                    <p className="text-sm text-gray-500 mt-2">
+  <p className="text-sm text-gray-500 mt-2">
                       Normal fasting blood sugar level is between 70-100 mg/dL
                     </p>
                   </div>
