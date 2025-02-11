@@ -288,7 +288,7 @@ export default function LabTestBooking() {
                   </CardTitle>
                   <CardDescription>Please provide your basic details for the lab test</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 hover:shadow-lg transition-shadow duration-300">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Form fields with animations */}
                     <div className="form-field space-y-2">
