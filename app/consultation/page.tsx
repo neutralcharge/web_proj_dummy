@@ -291,7 +291,7 @@ export default function LabTestBooking() {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Form fields with animations */}
-                    <div className="form-field space-y-2 hover:shadow-lg transition-shadow duration-300">
+                    <div className="form-field space-y-2">
                       <Label htmlFor="name">Full Name</Label>
                       <Input
                         id="name"
