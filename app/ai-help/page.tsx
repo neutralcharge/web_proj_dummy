@@ -146,7 +146,7 @@ export default function LabReportAnalyzer() {
             <iframe
               src="https://app.dante-ai.com/embed/?kb_id=3a286c00-ac41-4a29-86f7-b94c8c5e4361&token=f23d8f79-b62a-4ab6-93a0-0290b3c5e58a&modeltype=gpt-4-omnimodel-mini&tabs=false"
               allow="clipboard-write; clipboard-read; *;microphone *"
-              className="w-full h-[950px] rounded-lg"
+              className="w-full h-[650px] rounded-lg"
               frameBorder="0"
             />
           </div>
